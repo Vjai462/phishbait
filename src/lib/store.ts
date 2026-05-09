@@ -1,4 +1,4 @@
-import { create, type StateCreator } from 'zustand';
+import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 export type Challenge = {
@@ -11,7 +11,7 @@ export type Challenge = {
   redFlags: string[];
   explanation: string;
   educationTip: string;
-  data: any;
+  data: Record<string, unknown>;
 };
 
 export type AnswerRecord = {

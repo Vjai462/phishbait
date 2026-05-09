@@ -10,9 +10,6 @@ export default function ResultsPage() {
   const score = useGameStore((state) => state.score);
   const answers = useGameStore((state) => state.answers);
   const callsign = useGameStore((state) => state.callsign);
-  // difficulty is requested to be imported but not strictly rendered in this exact spec,
-  // we fetch it to adhere strictly to the "Read score, answers, callsign, difficulty, and resetGame" instruction.
-  const difficulty = useGameStore((state) => state.difficulty);
   const resetGame = useGameStore((state) => state.resetGame);
 
   useEffect(() => {

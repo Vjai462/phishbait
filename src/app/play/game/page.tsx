@@ -13,13 +13,10 @@ export default function GamePage() {
   
   // Store
   const phase = useGameStore((state) => state.phase);
-  const callsign = useGameStore((state) => state.callsign);
-  const difficulty = useGameStore((state) => state.difficulty);
   const challenges = useGameStore((state) => state.challenges);
   const currentIndex = useGameStore((state) => state.currentIndex);
   const score = useGameStore((state) => state.score);
   const streak = useGameStore((state) => state.streak);
-  const loadChallenges = useGameStore((state) => state.loadChallenges);
   const submitAnswer = useGameStore((state) => state.submitAnswer);
 
   // Local State
@@ -215,7 +212,8 @@ export default function GamePage() {
 
 function EmailCard({ challenge }: { challenge: Challenge }) {
   const [showFullLink, setShowFullLink] = useState(false);
-  const data = challenge.data;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const data = challenge.data as Record<string, any>;
   
   const initials = data.senderName 
     ? data.senderName.substring(0, 2).toUpperCase() 
@@ -284,7 +282,8 @@ function EmailCard({ challenge }: { challenge: Challenge }) {
 }
 
 function UrlCard({ challenge }: { challenge: Challenge }) {
-  const data = challenge.data;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const data = challenge.data as Record<string, any>;
   return (
     <div className="mt-[40px] shadow-[0_10px_40px_rgba(0,0,0,0.3)]">
       {data.context && (
@@ -300,7 +299,8 @@ function UrlCard({ challenge }: { challenge: Challenge }) {
 }
 
 function SmsCard({ challenge }: { challenge: Challenge }) {
-  const data = challenge.data;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const data = challenge.data as Record<string, any>;
   return (
     <div className="max-w-[320px] mx-auto bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-[16px] p-[20px] mt-[20px] shadow-[0_10px_40px_rgba(0,0,0,0.3)]">
       <div className="font-mono text-[var(--text-muted)] text-[0.75rem] text-center mb-[12px]">

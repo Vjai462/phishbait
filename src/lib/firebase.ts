@@ -1,4 +1,4 @@
-import { initializeApp, getApps, getApp } from "firebase/app";
+import { initializeApp, getApps } from "firebase/app";
 import { getDatabase, ref, push, query, orderByChild, limitToLast, DataSnapshot, get } from "firebase/database";
 
 const firebaseConfig = {
