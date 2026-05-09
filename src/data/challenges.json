@@ -5,7 +5,7 @@
     "difficulty": "easy",
     "isPhishing": true,
     "points": 100,
-    "timeLimit": 30,
+    "timeLimit": 45,
     "redFlags": [
       "Sender domain is hdfcbank-secure.com — not hdfcbank.com",
       "Urgent language: suspended within 24 hours",
@@ -30,7 +30,7 @@
     "difficulty": "easy",
     "isPhishing": true,
     "points": 100,
-    "timeLimit": 30,
+    "timeLimit": 45,
     "redFlags": [
       "IRCTC never sends refunds via SMS with a link",
       "Real IRCTC refunds go directly to your original payment method",
@@ -51,7 +51,7 @@
     "difficulty": "easy",
     "isPhishing": true,
     "points": 100,
-    "timeLimit": 30,
+    "timeLimit": 45,
     "redFlags": [
       "Domain is google-accounts-signin.com — not accounts.google.com",
       "Legitimate Google sign-in is always on accounts.google.com",
@@ -66,12 +66,157 @@
     }
   },
   {
+    "id": "netflix-password-reset-easy",
+    "type": "email",
+    "difficulty": "easy",
+    "isPhishing": false,
+    "points": 100,
+    "timeLimit": 45,
+    "redFlags": [
+      "Sender email is officially from netflix.com domain",
+      "Link points directly to the real https://www.netflix.com",
+      "No threatening language or urgent ultimatums"
+    ],
+    "explanation": "This is a legitimate password reset email from Netflix. It comes from the correct domain and points to the official website.",
+    "educationTip": "Legitimate password resets will only occur if you requested them. If you get one unexpectedly, don't click it, but the email itself isn't necessarily malicious.",
+    "data": {
+      "senderName": "Netflix",
+      "senderEmail": "info@mailer.netflix.com",
+      "subject": "Reset your password",
+      "body": "Hi,\n\nWe received a request to reset the password for your Netflix account.\n\nIf you requested this, click the link below to set a new password.\n\nIf you didn't make this request, you can safely ignore this email.",
+      "linkText": "Reset Password",
+      "linkUrl": "https://www.netflix.com/password/reset"
+    }
+  },
+  {
+    "id": "it-helpdesk-urgent-easy",
+    "type": "email",
+    "difficulty": "easy",
+    "isPhishing": true,
+    "points": 100,
+    "timeLimit": 45,
+    "redFlags": [
+      "Generic greeting 'Dear User'",
+      "Domain is suspicious 'it-support-portal-online.com' rather than company domain",
+      "Urgent ultimatum to prevent receiving emails"
+    ],
+    "explanation": "Fake IT helpdesk emails are common. Real IT departments will email you from an internal company address, not a generic online portal.",
+    "educationTip": "Always verify internal IT emails by checking the exact sender address. When in doubt, message IT on Slack or Teams.",
+    "data": {
+      "senderName": "IT Helpdesk",
+      "senderEmail": "admin@it-support-portal-online.com",
+      "subject": "URGENT: Mailbox Quota Exceeded",
+      "body": "Dear User,\n\nYour mailbox has exceeded its storage limit. You will not be able to send or receive new messages until you upgrade your quota.\n\nClick below to upgrade your quota for free.\n\nThank you,\nIT Dept",
+      "linkText": "Upgrade Quota",
+      "linkUrl": "http://it-support-portal-online.com/upgrade"
+    }
+  },
+  {
+    "id": "paypal-fake-receipt-easy",
+    "type": "email",
+    "difficulty": "easy",
+    "isPhishing": true,
+    "points": 100,
+    "timeLimit": 45,
+    "redFlags": [
+      "Creates panic with a large unauthorized charge",
+      "Link domain is not paypal.com",
+      "Encourages clicking a link to cancel an order instead of logging into the app"
+    ],
+    "explanation": "This email creates artificial panic to make you click a phishing link. Real PayPal emails come from paypal.com, not paypal-receipts-update.com.",
+    "educationTip": "Never click 'Cancel' links in receipt emails you don't recognize. Open a new browser tab, go to the official website, and check your account activity.",
+    "data": {
+      "senderName": "PayPal Service",
+      "senderEmail": "billing@paypal-receipts-update.com",
+      "subject": "Receipt for your payment to Coinbase",
+      "body": "Hello,\n\nYou sent a payment of $499.00 USD to Coinbase.\n\nIf you did not authorize this charge, please click the link below to cancel the transaction and claim a refund immediately.\n\nPayPal Support",
+      "linkText": "Cancel Transaction",
+      "linkUrl": "http://paypal-receipts-update.com/cancel"
+    }
+  },
+  {
+    "id": "apple-id-signin-easy",
+    "type": "url",
+    "difficulty": "easy",
+    "isPhishing": false,
+    "points": 100,
+    "timeLimit": 45,
+    "redFlags": [
+      "Domain exactly matches apple.com",
+      "Uses HTTPS",
+      "No suspicious subdomains or typos"
+    ],
+    "explanation": "This is the real Apple ID login portal. The domain ends exactly in apple.com.",
+    "educationTip": "Always verify the root domain (the word right before the .com or .org). Here it is apple, which is correct.",
+    "data": {
+      "url": "https://appleid.apple.com/sign-in",
+      "context": "You are trying to manage your Apple subscriptions on a new laptop"
+    }
+  },
+  {
+    "id": "instagram-fake-login-easy",
+    "type": "url",
+    "difficulty": "easy",
+    "isPhishing": true,
+    "points": 100,
+    "timeLimit": 45,
+    "redFlags": [
+      "Domain is instagram-login-support.com, not instagram.com",
+      "Missing HTTPS (not secure)",
+      "Suspicious context to force a login"
+    ],
+    "explanation": "This URL is attempting to steal Instagram credentials. The domain is not owned by Instagram.",
+    "educationTip": "Legitimate tech companies will never use hyphenated 'support' or 'login' domains for their main authentication pages.",
+    "data": {
+      "url": "http://instagram-login-support.com/auth",
+      "context": "Received via SMS claiming your account is about to be disabled"
+    }
+  },
+  {
+    "id": "sbi-transaction-alert-easy",
+    "type": "sms",
+    "difficulty": "easy",
+    "isPhishing": false,
+    "points": 100,
+    "timeLimit": 45,
+    "redFlags": [
+      "No links to click",
+      "Informational only, no action required",
+      "Standard bank SMS format with masked account number"
+    ],
+    "explanation": "This is a standard SMS notification for a bank deposit. It doesn't ask you to do anything or click anywhere.",
+    "educationTip": "Safe messages simply inform you of events. Messages that require you to click a link to 'verify' or 'claim' are almost always scams.",
+    "data": {
+      "from": "AD-SBIINB",
+      "body": "Dear Customer, your account XX1234 has been credited with Rs 500.00 on 12-May. Avl Bal: Rs 1500.00. -SBI"
+    }
+  },
+  {
+    "id": "electricity-bill-suspend-easy",
+    "type": "sms",
+    "difficulty": "easy",
+    "isPhishing": true,
+    "points": 100,
+    "timeLimit": 45,
+    "redFlags": [
+      "Sent from a personal 10-digit mobile number, not an official shortcode",
+      "Creates extreme urgency (disconnect tonight)",
+      "Terrible grammar and formatting"
+    ],
+    "explanation": "This is a classic scam in India. Electricity boards do not send disconnection threats from personal 10-digit mobile numbers.",
+    "educationTip": "Official communications will come from registered Sender IDs (like AD-BESCOM), not random mobile phone numbers.",
+    "data": {
+      "from": "9876543210",
+      "body": "Dear Customer, your electricity power will be disconnected tonight at 9:30 PM from the electricity office because your previous month bill was not updated. Please call our electricity officer at 9876543210 immediately."
+    }
+  },
+  {
     "id": "amazon-order-confirm-medium",
     "type": "email",
     "difficulty": "medium",
     "isPhishing": true,
     "points": 200,
-    "timeLimit": 20,
+    "timeLimit": 35,
     "redFlags": [
       "Sender email is orders@amazon-delivery-india.com — not amazon.in",
       "Order number format doesn't match real Amazon",
@@ -96,7 +241,7 @@
     "difficulty": "medium",
     "isPhishing": true,
     "points": 200,
-    "timeLimit": 20,
+    "timeLimit": 35,
     "redFlags": [
       "Zepto never asks you to share your OTP",
       "Legitimate OTP messages always say DO NOT share this OTP with anyone",
@@ -116,7 +261,7 @@
     "difficulty": "medium",
     "isPhishing": true,
     "points": 200,
-    "timeLimit": 20,
+    "timeLimit": 35,
     "redFlags": [
       "Domain is payva1t.com — uses digit 1 instead of letter l (typosquatting)",
       "HTTPS is present — but HTTPS only means the connection is encrypted, NOT that the site is legitimate",
@@ -136,8 +281,12 @@
     "difficulty": "medium",
     "isPhishing": false,
     "points": 200,
-    "timeLimit": 20,
-    "redFlags": [],
+    "timeLimit": 35,
+    "redFlags": [
+      "Sender domain is exactly github.com",
+      "Link points directly to github.com",
+      "No urgent threats to suspend account"
+    ],
     "explanation": "This is a legitimate GitHub security email. The sender domain is github.com, the link goes to github.com, it addresses you by username, uses no urgency tactics, and contains no threats.",
     "educationTip": "Not every security email is a phish. Legitimate ones address you by name/username, come from the real domain, and don't threaten you — they just inform you.",
     "data": {
@@ -150,12 +299,134 @@
     }
   },
   {
+    "id": "office365-quota-medium",
+    "type": "email",
+    "difficulty": "medium",
+    "isPhishing": true,
+    "points": 200,
+    "timeLimit": 35,
+    "redFlags": [
+      "Domain is microsoft-support.net, not microsoft.com",
+      "Offers to 'keep current password' which violates real security policies",
+      "Urgency factor of 24 hours"
+    ],
+    "explanation": "Microsoft does not use domains like microsoft-support.net for Office 365 alerts. Also, if a password policy requires a change, they don't offer a button to 'keep your current password'.",
+    "educationTip": "Scammers often create domains containing the name of a real company plus words like 'support', 'secure', or 'update'.",
+    "data": {
+      "senderName": "Microsoft 365",
+      "senderEmail": "no-reply@microsoft-support.net",
+      "subject": "Action Required: Password expiring in 24 hours",
+      "body": "Hello,\n\nYour Office 365 password is set to expire in 24 hours according to your organization's security policy.\n\nYou can keep your current password by validating your sign-in details below.\n\nMicrosoft Security Team",
+      "linkText": "Keep Current Password",
+      "linkUrl": "https://microsoft-support.net/auth/login"
+    }
+  },
+  {
+    "id": "linkedin-connection-medium",
+    "type": "email",
+    "difficulty": "medium",
+    "isPhishing": false,
+    "points": 200,
+    "timeLimit": 35,
+    "redFlags": [
+      "Sender email is from the official linkedin.com domain",
+      "Link points to genuine www.linkedin.com",
+      "Standard formatting for LinkedIn connection requests without urgency"
+    ],
+    "explanation": "This is a genuine notification from LinkedIn. It comes from the correct domain and links to the official website.",
+    "educationTip": "If you're ever unsure about an email notification, log directly into the app (like LinkedIn) and check your notifications there.",
+    "data": {
+      "senderName": "LinkedIn",
+      "senderEmail": "messages-noreply@linkedin.com",
+      "subject": "John Doe would like to connect on LinkedIn",
+      "body": "Hi,\n\nJohn Doe (Software Engineer at TechCorp) has sent you a connection request on LinkedIn.\n\nView John's profile to see if you know them.",
+      "linkText": "Accept Request",
+      "linkUrl": "https://www.linkedin.com/comm/invitations"
+    }
+  },
+  {
+    "id": "aws-console-login-medium",
+    "type": "url",
+    "difficulty": "medium",
+    "isPhishing": false,
+    "points": 200,
+    "timeLimit": 35,
+    "redFlags": [
+      "Domain ends in amazon.com",
+      "Subdomain console.aws is the standard AWS login path",
+      "Uses HTTPS encryption"
+    ],
+    "explanation": "This is the real AWS Console URL. It correctly ends in amazon.com.",
+    "educationTip": "For complex subdomains, always look at the two words right before the first single slash. aws.amazon.com means it's an amazon.com site.",
+    "data": {
+      "url": "https://console.aws.amazon.com/console/home",
+      "context": "You typed this into your browser to check your server logs"
+    }
+  },
+  {
+    "id": "dropbox-fake-share-medium",
+    "type": "url",
+    "difficulty": "medium",
+    "isPhishing": true,
+    "points": 200,
+    "timeLimit": 35,
+    "redFlags": [
+      "Uses a zero (0) instead of 'o' in dropbox",
+      "Domain ends in -share.com instead of just dropbox.com",
+      "Classic typosquatting technique"
+    ],
+    "explanation": "This is a typosquatting URL designed to look like Dropbox. It uses a zero instead of an 'o' and adds '-share' to the domain.",
+    "educationTip": "Scammers rely on you reading URLs quickly. Always double-check the spelling of the domain, especially looking for numbers replacing letters.",
+    "data": {
+      "url": "https://www.dropb0x-share.com/file/document.pdf",
+      "context": "A client emailed you a link to an invoice"
+    }
+  },
+  {
+    "id": "swiggy-delivery-medium",
+    "type": "sms",
+    "difficulty": "medium",
+    "isPhishing": false,
+    "points": 200,
+    "timeLimit": 35,
+    "redFlags": [
+      "Sender ID is official VM-SWIGGY",
+      "Link uses official swiggy.in short domain",
+      "Expected message after placing an order"
+    ],
+    "explanation": "This is a legitimate Swiggy tracking SMS. It uses their official shortlink domain swiggy.in.",
+    "educationTip": "Legitimate tracking links should always use the company's official domain or known shortlink.",
+    "data": {
+      "from": "VM-SWIGGY",
+      "body": "Swiggy: Your order from Meghana Foods is out for delivery. Track your order here: https://swiggy.in/track/xyz123"
+    }
+  },
+  {
+    "id": "incometax-refund-medium",
+    "type": "sms",
+    "difficulty": "medium",
+    "isPhishing": true,
+    "points": 200,
+    "timeLimit": 35,
+    "redFlags": [
+      "Domain is fake (real is incometax.gov.in)",
+      "Government departments do not ask for bank details via SMS link",
+      "Exploits greed/hope by promising money"
+    ],
+    "explanation": "The Income Tax Department never sends links via SMS asking you to verify your bank account. The domain incometax-refund-gov.in is fake.",
+    "educationTip": "Any unexpected message promising money is likely a scam. Go to the official government portal directly instead of clicking links.",
+    "data": {
+      "from": "AD-INCOMT",
+      "body": "Important: Your income tax refund of Rs 15,400 has been approved. Please verify your bank account details here to receive funds: https://incometax-refund-gov.in/verify"
+    }
+  },
+  {
     "id": "aadhaar-kyc-hard",
     "type": "email",
     "difficulty": "hard",
     "isPhishing": true,
     "points": 300,
-    "timeLimit": 15,
+    "timeLimit": 25,
     "redFlags": [
       "UIDAI's official domain is uidai.gov.in — sender is kyc-update@uidai.gov.in.secure-kyc.com",
       "gov.in appears as a subdomain — real domain is secure-kyc.com",
@@ -180,7 +451,7 @@
     "difficulty": "hard",
     "isPhishing": true,
     "points": 300,
-    "timeLimit": 15,
+    "timeLimit": 25,
     "redFlags": [
       "Domain is s1ack.com — digit 1 replaces letter l, very hard to spot in some fonts",
       "HTTPS present and path looks completely legitimate",
@@ -200,7 +471,7 @@
     "difficulty": "hard",
     "isPhishing": true,
     "points": 300,
-    "timeLimit": 15,
+    "timeLimit": 25,
     "redFlags": [
       "Sender domain is infosys-hr.com — real Infosys HR emails come from infosys.com only",
       "Legitimate offer letters are sent via official portals, not raw email attachments",
@@ -217,6 +488,147 @@
       "body": "Dear Candidate,\n\nAfter careful evaluation of your profile and interviews, we are pleased to extend an offer of employment at Infosys Limited.\n\nRole: Software Engineer / Systems Engineer\nLocation: Bangalore / Hyderabad\nCTC: Rs.3,60,000 per annum\nJoining Date: January 15, 2025\n\nPlease find your official offer letter attached (PDF).\n\nTo confirm your acceptance, please reply to this email with the following documents within 48 hours:\n1. Aadhaar Card (front and back)\n2. PAN Card\n3. 10th, 12th, and degree marksheets\n4. Passport size photograph\n\nOffer lapses if not accepted within 48 hours.\n\nInfosys Recruitment Team",
       "linkText": null,
       "linkUrl": null
+    }
+  },
+  {
+    "id": "google-doc-share-hard",
+    "type": "email",
+    "difficulty": "hard",
+    "isPhishing": true,
+    "points": 300,
+    "timeLimit": 25,
+    "redFlags": [
+      "Sender domain is google-docs.com, which is fake. Real Google Docs come from google.com",
+      "Link points to google-docs.com instead of docs.google.com",
+      "Highly realistic format mimicking real Google Drive emails"
+    ],
+    "explanation": "This is a sophisticated attack using a very realistic domain name. Google does not use 'google-docs.com'. Their services always live on subdomains of google.com.",
+    "educationTip": "Pay close attention to domains for major tech companies. Scammers often register hyphenated versions of their names.",
+    "data": {
+      "senderName": "Sarah Connor (via Google Docs)",
+      "senderEmail": "drive-shares@google-docs.com",
+      "subject": "Document shared with you: 'Q4 Financial Projections'",
+      "body": "Sarah Connor has invited you to view the following document:\n\nQ4 Financial Projections.pdf\n\nClick below to open the document securely.",
+      "linkText": "Open Document",
+      "linkUrl": "https://google-docs.com/document/d/1a2b3c4d5e/view"
+    }
+  },
+  {
+    "id": "microsoft-account-activity-hard",
+    "type": "email",
+    "difficulty": "hard",
+    "isPhishing": false,
+    "points": 300,
+    "timeLimit": 25,
+    "redFlags": [
+      "Sender domain accountprotection.microsoft.com is a legitimate Microsoft security domain",
+      "Link points to account.live.com, a real Microsoft authentication domain",
+      "Does not threaten immediate account suspension, just advises review"
+    ],
+    "explanation": "This is a genuine Microsoft security alert. Microsoft actually uses the domain accountprotection.microsoft.com for these alerts, which can look suspicious but is real.",
+    "educationTip": "If you receive an alert like this and aren't sure, don't click the link. Open your browser, go to microsoft.com, log in, and check your security settings directly.",
+    "data": {
+      "senderName": "Microsoft account team",
+      "senderEmail": "account-security-noreply@accountprotection.microsoft.com",
+      "subject": "Microsoft account unusual sign-in activity",
+      "body": "We detected something unusual about a recent sign-in to the Microsoft account.\n\nSign-in details\nCountry/region: Russia\nIP address: 103.24.11.9\nDate: Today\n\nIf this was you, you can safely ignore this email.\nIf you're not sure this was you, a malicious user might have your password. Please review your recent activity and we'll help you secure your account.",
+      "linkText": "Review recent activity",
+      "linkUrl": "https://account.live.com/Activity"
+    }
+  },
+  {
+    "id": "binance-fake-login-hard",
+    "type": "url",
+    "difficulty": "hard",
+    "isPhishing": true,
+    "points": 300,
+    "timeLimit": 25,
+    "redFlags": [
+      "Domain ends in .co instead of .com",
+      "Search ads are frequently hijacked by phishing campaigns",
+      "Everything else looks identical to the real URL"
+    ],
+    "explanation": "This is an extremely dangerous attack where scammers buy Google Ads to appear at the top of search results. The domain binance.co is fake.",
+    "educationTip": "Never click on 'Sponsored' ad links when searching for crypto exchanges or banks. Always type the URL manually or use a bookmark.",
+    "data": {
+      "url": "https://accounts.binance.co/en/login",
+      "context": "You searched 'Binance login' on Google and clicked the first ad result"
+    }
+  },
+  {
+    "id": "salesforce-login-hard",
+    "type": "url",
+    "difficulty": "hard",
+    "isPhishing": false,
+    "points": 300,
+    "timeLimit": 25,
+    "redFlags": [
+      "Domain is exactly salesforce.com",
+      "HTTPS is active",
+      "No subtle misspellings or weird subdomains"
+    ],
+    "explanation": "This is a standard Salesforce login URL. It is perfectly safe.",
+    "educationTip": "A clean URL pointing exactly to the expected root domain (salesforce.com) is a strong indicator of legitimacy.",
+    "data": {
+      "url": "https://login.salesforce.com/?locale=in",
+      "context": "You are logging in to work to check your CRM dashboard"
+    }
+  },
+  {
+    "id": "bluedart-missed-delivery-hard",
+    "type": "sms",
+    "difficulty": "hard",
+    "isPhishing": true,
+    "points": 300,
+    "timeLimit": 25,
+    "redFlags": [
+      "Uses a URL shortener (bit.ly) to hide the real destination",
+      "Asks for a small fee, which is a classic credit card harvesting technique",
+      "Legitimate couriers don't charge redelivery fees via SMS"
+    ],
+    "explanation": "This scam tricks you into paying a tiny 'redelivery fee'. When you enter your card details on the fake site, they steal the card info and make much larger unauthorized charges.",
+    "educationTip": "Never pay unexpected small fees via SMS links. If a package is genuinely delayed, check the tracking number on the official website.",
+    "data": {
+      "from": "AD-BLUDAR",
+      "body": "BlueDart: We attempted to deliver your package (AWB 8839210) but no one was available. Please reschedule and pay the Rs 15 redelivery fee: https://bit.ly/bd-redeliver"
+    }
+  },
+  {
+    "id": "whatsapp-device-added-hard",
+    "type": "sms",
+    "difficulty": "hard",
+    "isPhishing": true,
+    "points": 300,
+    "timeLimit": 25,
+    "redFlags": [
+      "Domain wa-device-security.com is fake",
+      "Creates panic by implying your account is compromised",
+      "WhatsApp secures accounts within the app, not via external web links"
+    ],
+    "explanation": "This SMS creates immense panic. The domain looks plausible but is not owned by WhatsApp.",
+    "educationTip": "WhatsApp alerts you about linked devices inside the app itself, not via SMS links. Never click external links to manage WhatsApp security.",
+    "data": {
+      "from": "WhatsApp",
+      "body": "WhatsApp: A new device was linked to your account. If this wasn't you, secure your account immediately at https://wa-device-security.com/revoke"
+    }
+  },
+  {
+    "id": "cowin-otp-hard",
+    "type": "sms",
+    "difficulty": "hard",
+    "isPhishing": false,
+    "points": 300,
+    "timeLimit": 25,
+    "redFlags": [
+      "No links provided",
+      "Standard government SMS sender ID",
+      "Contains a time-limited OTP with no suspicious instructions"
+    ],
+    "explanation": "This is a legitimate OTP message from the CoWIN portal. It contains no links and simply provides the code you requested.",
+    "educationTip": "Real OTP messages just give you the code and tell you not to share it. They don't include links to 'fix problems' or 'verify accounts'.",
+    "data": {
+      "from": "AX-NHPMJS",
+      "body": "Your OTP to register/access CoWIN is 849201. It will be valid for 3 minutes. - MoHFW"
     }
   }
 ]
