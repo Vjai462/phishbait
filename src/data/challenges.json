@@ -1,0 +1,222 @@
+[
+  {
+    "id": "hdfc-account-limit-easy",
+    "type": "email",
+    "difficulty": "easy",
+    "isPhishing": true,
+    "points": 100,
+    "timeLimit": 30,
+    "redFlags": [
+      "Sender domain is hdfcbank-secure.com — not hdfcbank.com",
+      "Urgent language: suspended within 24 hours",
+      "Link goes to hdfc-verify.ru — .ru TLD unrelated to HDFC",
+      "Generic greeting: Dear Customer instead of your name",
+      "Threatens account suspension to force immediate action"
+    ],
+    "explanation": "This is a phishing email. HDFC Bank's real domain is hdfcbank.com — any variation like hdfcbank-secure.com is fake. The .ru destination link is a dead giveaway. Real banks never threaten suspension via email.",
+    "educationTip": "Always hover over links before clicking. If the destination domain doesn't exactly match the company's official website, don't click.",
+    "data": {
+      "senderName": "HDFC Bank Security",
+      "senderEmail": "security@hdfcbank-secure.com",
+      "subject": "URGENT: Your HDFC Bank account will be suspended",
+      "body": "Dear Customer,\n\nWe have detected unusual login activity on your HDFC Bank account. To prevent unauthorized access, your account will be suspended within 24 hours unless you verify your identity immediately.\n\nClick the link below to complete verification and restore full access.\n\nFailure to verify will result in permanent account suspension.\n\nHDFC Bank Security Team",
+      "linkText": "Verify My Account Now",
+      "linkUrl": "http://hdfc-verify.ru/account/login"
+    }
+  },
+  {
+    "id": "irctc-ticket-refund-easy",
+    "type": "sms",
+    "difficulty": "easy",
+    "isPhishing": true,
+    "points": 100,
+    "timeLimit": 30,
+    "redFlags": [
+      "IRCTC never sends refunds via SMS with a link",
+      "Real IRCTC refunds go directly to your original payment method",
+      "URL is irctc-refund.in — not irctc.co.in",
+      "Creates urgency: expires in 2 hours",
+      "Asks you to claim money — banks don't work this way"
+    ],
+    "explanation": "IRCTC refunds are automatically credited to your original payment method — they never ask you to click a link to claim a refund. The domain irctc-refund.in has no connection to Indian Railways.",
+    "educationTip": "No legitimate company will ever ask you to click a link to receive a refund. Refunds are always pushed to you automatically.",
+    "data": {
+      "from": "VM-IRCTC",
+      "body": "IRCTC: Your ticket refund of Rs.847 is ready. Claim your refund before it expires in 2 hours. Visit http://irctc-refund.in/claim?ref=TXN8847291 - Indian Railways"
+    }
+  },
+  {
+    "id": "google-account-warning-easy",
+    "type": "url",
+    "difficulty": "easy",
+    "isPhishing": true,
+    "points": 100,
+    "timeLimit": 30,
+    "redFlags": [
+      "Domain is google-accounts-signin.com — not accounts.google.com",
+      "Legitimate Google sign-in is always on accounts.google.com",
+      "Subdomain trick: accounts appears in the URL but is not the actual domain",
+      "HTTP not HTTPS"
+    ],
+    "explanation": "This URL uses accounts as a subdomain to look like Google, but the actual domain is google-accounts-signin.com — a fake site. Google's real sign-in URL is always accounts.google.com.",
+    "educationTip": "Read URLs from right to left, stopping at the first slash. Everything before that slash is the domain. accounts.google-accounts-signin.com is owned by google-accounts-signin.com, not Google.",
+    "data": {
+      "url": "http://accounts.google-accounts-signin.com/signin/v2/identifier",
+      "context": "You received this link in an email saying your Google account was accessed from a new device"
+    }
+  },
+  {
+    "id": "amazon-order-confirm-medium",
+    "type": "email",
+    "difficulty": "medium",
+    "isPhishing": true,
+    "points": 200,
+    "timeLimit": 20,
+    "redFlags": [
+      "Sender email is orders@amazon-delivery-india.com — not amazon.in",
+      "Order number format doesn't match real Amazon",
+      "Link domain is amazon-order-verify.com — not amazon.in",
+      "Asks to confirm shipping address by clicking — Amazon never does this post-order",
+      "Amount is suspiciously round: 4,999"
+    ],
+    "explanation": "Amazon's legitimate emails come from amazon.in or amazon.com. The sender domain here is amazon-delivery-india.com — a completely separate site with no link to Amazon.",
+    "educationTip": "When in doubt about an order, go directly to amazon.in and check My Orders — never click links in emails.",
+    "data": {
+      "senderName": "Amazon India",
+      "senderEmail": "orders@amazon-delivery-india.com",
+      "subject": "Order Confirmation — Your order IN-2024-88471 has been placed",
+      "body": "Hello,\n\nThank you for shopping with Amazon India! Your order IN-2024-88471 for Rs.4,999 has been received and is being processed.\n\nExpected delivery: 2-4 business days.\n\nTo ensure successful delivery, please confirm your shipping address by clicking the link below. Orders with unconfirmed addresses may be delayed or cancelled.\n\nAmazon Customer Service",
+      "linkText": "Confirm Shipping Address",
+      "linkUrl": "http://amazon-order-verify.com/confirm?order=IN-2024-88471"
+    }
+  },
+  {
+    "id": "zepto-otp-sms-medium",
+    "type": "sms",
+    "difficulty": "medium",
+    "isPhishing": true,
+    "points": 200,
+    "timeLimit": 20,
+    "redFlags": [
+      "Zepto never asks you to share your OTP",
+      "Legitimate OTP messages always say DO NOT share this OTP with anyone",
+      "This SMS asks you to forward the OTP — a social engineering red flag",
+      "Fake delivery agent scenario to create a believable reason to share OTP"
+    ],
+    "explanation": "This is a smishing attack that tricks you into sharing your OTP under the guise of delivery verification. Real delivery apps like Zepto never require you to share an OTP with a delivery agent.",
+    "educationTip": "An OTP is a secret between you and the service. No employee, delivery agent, or support person from any legitimate company will ever ask for your OTP.",
+    "data": {
+      "from": "91-98712-34567",
+      "body": "Hi, this is Ravi from Zepto delivery. Your order is outside but the app is showing an error. Please share the OTP you just received on this number so I can mark your delivery complete. Sorry for the trouble!"
+    }
+  },
+  {
+    "id": "payvault-login-medium",
+    "type": "url",
+    "difficulty": "medium",
+    "isPhishing": true,
+    "points": 200,
+    "timeLimit": 20,
+    "redFlags": [
+      "Domain is payva1t.com — uses digit 1 instead of letter l (typosquatting)",
+      "HTTPS is present — but HTTPS only means the connection is encrypted, NOT that the site is legitimate",
+      "Path /securelogin looks convincing but means nothing",
+      "Subtle character substitution is a classic hard-to-spot phishing technique"
+    ],
+    "explanation": "This URL uses typosquatting — replacing the letter l with the digit 1 in payvault. The site has HTTPS, which tricks many people into thinking it's safe. HTTPS only means your connection to the fake site is encrypted.",
+    "educationTip": "HTTPS does not mean a website is safe. It only means your connection is encrypted. Scammers can and do get HTTPS certificates for fake sites.",
+    "data": {
+      "url": "https://www.payva1t.com/securelogin",
+      "context": "You received this URL in a WhatsApp message from an unknown number saying your PayVault account shows suspicious activity"
+    }
+  },
+  {
+    "id": "github-real-email-medium",
+    "type": "email",
+    "difficulty": "medium",
+    "isPhishing": false,
+    "points": 200,
+    "timeLimit": 20,
+    "redFlags": [],
+    "explanation": "This is a legitimate GitHub security email. The sender domain is github.com, the link goes to github.com, it addresses you by username, uses no urgency tactics, and contains no threats.",
+    "educationTip": "Not every security email is a phish. Legitimate ones address you by name/username, come from the real domain, and don't threaten you — they just inform you.",
+    "data": {
+      "senderName": "GitHub",
+      "senderEmail": "noreply@github.com",
+      "subject": "New sign-in to your GitHub account",
+      "body": "Hi vijaydev,\n\nA new sign-in to your GitHub account was detected.\n\nChrome on Windows — Mumbai, India — Today at 2:34 PM IST\n\nIf this was you, no action is needed.\n\nIf you don't recognize this sign-in, please secure your account immediately by visiting your account security settings.\n\nThe GitHub Team",
+      "linkText": "Review your account security",
+      "linkUrl": "https://github.com/settings/security"
+    }
+  },
+  {
+    "id": "aadhaar-kyc-hard",
+    "type": "email",
+    "difficulty": "hard",
+    "isPhishing": true,
+    "points": 300,
+    "timeLimit": 15,
+    "redFlags": [
+      "UIDAI's official domain is uidai.gov.in — sender is kyc-update@uidai.gov.in.secure-kyc.com",
+      "gov.in appears as a subdomain — real domain is secure-kyc.com",
+      "UIDAI never sends KYC requests via email",
+      "Deadline pressure: 72 hours or services will be suspended",
+      "Very convincing formatting and official-sounding language"
+    ],
+    "explanation": "This is a highly convincing phish. The sender email contains uidai.gov.in which looks official, but it appears as part of a subdomain — the actual domain is secure-kyc.com. UIDAI never contacts you via email for KYC updates.",
+    "educationTip": "When an email address contains a legitimate government domain, look at what comes AFTER the last dot before the @ symbol — that's the real domain. kyc-update@uidai.gov.in.secure-kyc.com is owned by secure-kyc.com, not UIDAI.",
+    "data": {
+      "senderName": "UIDAI - Aadhaar Services",
+      "senderEmail": "kyc-update@uidai.gov.in.secure-kyc.com",
+      "subject": "Action Required: Complete your Aadhaar KYC update before 30th November",
+      "body": "Dear Aadhaar Holder,\n\nAs part of the annual Aadhaar data verification drive mandated by the Government of India, all Aadhaar cardholders are required to complete a digital KYC re-verification by 30th November 2024.\n\nFailure to complete this process within 72 hours will result in temporary suspension of your Aadhaar-linked services including:\n- UPI and banking services\n- Mobile SIM (TRAI mandate)\n- DigiLocker access\n\nThe process takes less than 2 minutes. You will need your Aadhaar number and registered mobile phone.\n\nReference: UIDAI-KYC-2024-MH-771234\nMinistry of Electronics and Information Technology, Government of India",
+      "linkText": "Complete KYC Verification",
+      "linkUrl": "https://myaadhaar.uidai.gov.in.secure-kyc.com/kyc/verify"
+    }
+  },
+  {
+    "id": "slack-workspace-hard",
+    "type": "url",
+    "difficulty": "hard",
+    "isPhishing": true,
+    "points": 300,
+    "timeLimit": 15,
+    "redFlags": [
+      "Domain is s1ack.com — digit 1 replaces letter l, very hard to spot in some fonts",
+      "HTTPS present and path looks completely legitimate",
+      "No other obvious signs — this is a pure typosquat attack",
+      "In certain fonts (Arial, Calibri) 1 and l are visually identical"
+    ],
+    "explanation": "This is an extremely subtle typosquatting attack. s1ack.com uses the digit 1 instead of l, making it look identical to slack.com in many fonts. There are no other red flags — this is why it's rated hard.",
+    "educationTip": "For services you use daily, bookmark the official URL and always access them through bookmarks — never from links in messages or emails.",
+    "data": {
+      "url": "https://s1ack.com/signin/workspace-login?returnto=%2Farchives%2FD04TQKB3J",
+      "context": "A colleague sent this Slack link in a WhatsApp message saying 'check this thread, tagged you'"
+    }
+  },
+  {
+    "id": "infosys-hr-offer-hard",
+    "type": "email",
+    "difficulty": "hard",
+    "isPhishing": true,
+    "points": 300,
+    "timeLimit": 15,
+    "redFlags": [
+      "Sender domain is infosys-hr.com — real Infosys HR emails come from infosys.com only",
+      "Legitimate offer letters are sent via official portals, not raw email attachments",
+      "Asks for PAN and Aadhaar via email — this is never done legitimately",
+      "No mention of recruiter employee ID or verifiable contact at official Infosys numbers",
+      "Urgency: accept within 48 hours"
+    ],
+    "explanation": "Job offer phishing targets freshers and job seekers. Infosys HR will only contact candidates from infosys.com domains and through their official hiring portals. Any request to submit Aadhaar or PAN via email is a data theft attempt.",
+    "educationTip": "Verify any job offer by calling the company's official number listed on their website — not any number provided in the email. Real HR teams expect you to verify.",
+    "data": {
+      "senderName": "Infosys HR Team",
+      "senderEmail": "hr.recruitment@infosys-hr.com",
+      "subject": "Congratulations! Offer Letter — Software Engineer, Infosys Limited",
+      "body": "Dear Candidate,\n\nAfter careful evaluation of your profile and interviews, we are pleased to extend an offer of employment at Infosys Limited.\n\nRole: Software Engineer / Systems Engineer\nLocation: Bangalore / Hyderabad\nCTC: Rs.3,60,000 per annum\nJoining Date: January 15, 2025\n\nPlease find your official offer letter attached (PDF).\n\nTo confirm your acceptance, please reply to this email with the following documents within 48 hours:\n1. Aadhaar Card (front and back)\n2. PAN Card\n3. 10th, 12th, and degree marksheets\n4. Passport size photograph\n\nOffer lapses if not accepted within 48 hours.\n\nInfosys Recruitment Team",
+      "linkText": null,
+      "linkUrl": null
+    }
+  }
+]
