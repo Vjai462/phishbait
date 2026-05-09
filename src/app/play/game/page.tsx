@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { useGameStore, type Challenge } from "@/lib/store";
 import challengesData from "@/data/challenges.json";
+import { ShieldAlert, ShieldX, ShieldCheck, CheckCircle2, XCircle } from "lucide-react";
 
 // Type assertion for challengesData since we're loading directly from JSON
 const typedChallenges = challengesData as Challenge[];
@@ -18,6 +19,7 @@ export default function GamePage() {
   const score = useGameStore((state) => state.score);
   const streak = useGameStore((state) => state.streak);
   const submitAnswer = useGameStore((state) => state.submitAnswer);
+  const nextChallenge = useGameStore((state) => state.nextChallenge);
 
   // Local State
   const [timeLeft, setTimeLeft] = useState(30);
@@ -76,6 +78,12 @@ export default function GamePage() {
     };
   }, [challenge, answered]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  const handleNextChallenge = () => {
+    nextChallenge();
+    setAnswered(false);
+    setLastCorrect(null);
+  };
+
   const handleAnswer = (choice: "phishing" | "legit", isTimeout = false) => {
     if (answered) return;
     
@@ -93,11 +101,6 @@ export default function GamePage() {
     submitAnswer(finalChoice);
     
     if (timerRef.current) clearInterval(timerRef.current);
-
-    setTimeout(() => {
-      setAnswered(false);
-      setLastCorrect(null);
-    }, 1800);
   };
 
   if (!challenge || phase !== "playing") {
@@ -109,101 +112,134 @@ export default function GamePage() {
   }
 
   const timerPercent = (timeLeft / challenge.timeLimit) * 100;
-  const isTimeLow = timerPercent <= 30;
 
   return (
-    <div className="min-h-screen bg-[var(--bg-void)] relative pb-[100px]">
-      {/* 1. TOP BAR */}
-      <div className="fixed top-0 w-full z-50 bg-[rgba(10,10,20,0.95)] px-[24px] py-[12px] flex items-center justify-between border-b border-[var(--border-subtle)] backdrop-blur-md">
-        <div className="font-mono text-[var(--accent-danger)] text-[1.2rem]">
-          🎣 PHISHBAIT
+    <div className="min-h-screen bg-[#0A0A14] relative pb-[100px] overflow-x-hidden">
+      {/* BACKGROUND */}
+      <video
+        src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260328_091828_e240eb17-6edc-4129-ad9d-98678e3fd238.mp4"
+        autoPlay
+        muted
+        loop
+        playsInline
+        className="absolute inset-0 w-full h-full object-cover opacity-10 pointer-events-none"
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-[#0A0A14]/80 via-transparent to-[#0A0A14] z-0 pointer-events-none" />
+
+      {/* TOP HUD BAR */}
+      <div className="fixed top-0 w-full z-50 bg-[rgba(10,10,20,0.92)] backdrop-blur-xl border-b border-[rgba(255,255,255,0.06)] h-[56px] px-6 flex items-center justify-between">
+        <div className="flex items-center">
+          <ShieldAlert size={18} color="#ff3b3b" />
+          <span className="font-mono text-[#ff3b3b] text-sm tracking-widest ml-2 font-bold">PHISHBAIT</span>
         </div>
-        <div className="font-mono text-[var(--text-muted)] absolute left-1/2 -translate-x-1/2">
-          {currentIndex + 1} / 10
+        <div className="font-mono text-[#64748b] text-xs tracking-widest absolute left-1/2 -translate-x-1/2">
+          THREAT {currentIndex + 1} OF 10
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center">
+          <div className="flex items-baseline">
+            <span className="font-[Syne] font-bold text-[#f59e0b] text-base">{score}</span>
+            <span className="text-[#64748b] text-xs ml-1 font-mono">PTS</span>
+          </div>
           {streak >= 3 && (
-            <div className="font-mono text-[var(--accent-points)] text-[0.85rem] bg-[color-mix(in_srgb,var(--accent-points)_15%,transparent)] px-2 py-0.5 rounded border border-[color-mix(in_srgb,var(--accent-points)_30%,transparent)]">
-              🔥 {streak}streak
+            <div className="anim-pulse bg-[#f59e0b]/10 border border-[#f59e0b]/30 text-[#f59e0b] font-mono text-xs px-2 py-0.5 rounded-full ml-3">
+              🔥 {streak}x
             </div>
           )}
-          <div className="flex items-baseline gap-1">
-            <span className="font-[Syne] font-bold text-[var(--accent-points)] text-[1.1rem]">
-              {score}
-            </span>
-            <span className="text-[var(--text-muted)] font-mono text-xs">PTS</span>
-          </div>
         </div>
       </div>
 
-      {/* 2. TIMER BAR */}
-      <div className="fixed top-[52px] w-full h-[4px] bg-[var(--border-subtle)] z-40">
+      {/* TIMER BAR */}
+      <div className="fixed top-[56px] w-full h-[3px] bg-[#1a1a2e] z-40">
         <div 
           className="h-full transition-all duration-1000 ease-linear"
           style={{ 
             width: `${timerPercent}%`,
-            backgroundColor: isTimeLow ? "var(--accent-danger)" : "var(--accent-info)"
+            backgroundColor: timerPercent > 60 ? "#3b82f6" : timerPercent > 30 ? "#f59e0b" : "#ff3b3b",
+            boxShadow: timerPercent <= 30 ? "0 0 8px #ff3b3b" : "none"
           }}
         />
       </div>
 
-      {/* 3. CHALLENGE CARD */}
-      <div className={`mt-[80px] max-w-[680px] mx-auto px-[16px] relative ${!lastCorrect && answered ? "anim-shake" : ""}`}>
-        {challenge.type === "email" && <EmailCard challenge={challenge} />}
-        {challenge.type === "url" && <UrlCard challenge={challenge} />}
-        {challenge.type === "sms" && <SmsCard challenge={challenge} />}
+      {/* MAIN CONTENT AREA */}
+      <div className="pt-20 pb-32 min-h-screen flex flex-col items-center justify-center relative z-10 w-full">
+        
+        {/* THREAT CONTEXT LABEL */}
+        <div className="mb-4 bg-[#ff3b3b]/10 border border-[#ff3b3b]/20 text-[#ff3b3b] font-mono text-[10px] tracking-widest px-3 py-1 rounded-full">
+          {challenge.type === "email" ? "⚠ SUSPICIOUS EMAIL INTERCEPTED" : 
+           challenge.type === "url" ? "⚠ MALICIOUS LINK DETECTED" : 
+           "⚠ SUSPICIOUS SMS RECEIVED"}
+        </div>
 
-        {/* FEEDBACK OVERLAY */}
-        {answered && (
+        {/* CHALLENGE CARD */}
+        <div className={`w-full max-w-[680px] mx-auto px-4 ${!lastCorrect && answered ? "anim-shake" : ""}`}>
           <div 
-            className="absolute inset-0 z-30 flex flex-col items-center justify-center rounded-[8px] p-6 backdrop-blur-[2px] transition-all duration-300"
-            style={{ 
-              backgroundColor: lastCorrect 
-                ? "rgba(40,200,64,0.15)" // Safe green tint
-                : "rgba(255,59,59,0.15)" // Danger red tint
+            className="bg-[rgba(15,15,30,0.95)] border border-[rgba(255,255,255,0.08)] rounded-[16px] backdrop-blur-sm border-t-[2px] border-t-[#ff3b3b] overflow-hidden p-[1px]"
+            style={{
+              boxShadow: (answered && lastCorrect === false) 
+                ? "0 0 0 1px rgba(255,59,59,0.4), 0 24px 60px rgba(0,0,0,0.5)" 
+                : "0 0 0 1px rgba(255,59,59,0.05), 0 24px 60px rgba(0,0,0,0.5)",
+              borderColor: (answered && lastCorrect === false) ? "rgba(255,59,59,0.4)" : "rgba(255,255,255,0.08)"
             }}
           >
-            <div 
-              className={`font-[Syne] font-extrabold text-[2rem] text-center drop-shadow-lg ${
-                lastCorrect ? "text-[var(--accent-safe)]" : "text-[var(--accent-danger)]"
-              }`}
-            >
-              {lastCorrect ? "NICE CATCH ✓" : "CAUGHT! ✗"}
-            </div>
-            
-            {!lastCorrect && challenge.redFlags.length > 0 && (
-              <div className="mt-6 flex flex-wrap justify-center gap-2 max-w-[90%]">
-                {challenge.redFlags.map((flag, i) => (
-                  <div 
-                    key={i} 
-                    className="bg-[rgba(255,59,59,0.15)] border border-[var(--accent-danger)] text-[var(--text-primary)] text-[0.75rem] px-[10px] py-[4px] rounded-[4px] font-mono text-center shadow-sm"
-                  >
-                    {flag}
-                  </div>
-                ))}
+            {challenge.type === "email" && <EmailCard challenge={challenge} />}
+            {challenge.type === "url" && <UrlCard challenge={challenge} />}
+            {challenge.type === "sms" && <SmsCard challenge={challenge} />}
+          </div>
+        </div>
+
+        {/* ANSWER FEEDBACK PANEL */}
+        {answered && (
+          <div className="mt-4 max-w-[680px] mx-auto px-4 w-full">
+            <div className={`rounded-2xl p-5 border ${lastCorrect ? "bg-[#052e16]/80 border-[#16a34a]/40" : "bg-[#2d0a0a]/80 border-[#ff3b3b]/40"}`}>
+              <div className="flex items-center gap-3">
+                {lastCorrect ? <CheckCircle2 size={20} color="#16a34a" /> : <XCircle size={20} color="#ff3b3b" />}
+                <span className={`font-[Syne] font-bold text-sm tracking-wide ${lastCorrect ? "text-[#16a34a]" : "text-[#ff3b3b]"}`}>
+                  {lastCorrect ? "THREAT NEUTRALISED" : "BREACH DETECTED"}
+                </span>
               </div>
-            )}
+              
+              <div className="mt-2 mb-4">
+                <div className="text-[#64748b] font-mono text-xs mb-2">Here&apos;s why:</div>
+                <div className="flex flex-col gap-2">
+                  {challenge.redFlags.map((flag, i) => (
+                    <div key={i} className="flex items-start gap-2">
+                      <span className={lastCorrect ? "text-[#16a34a]" : "text-[#ff3b3b]"}>›</span>
+                      <span className="text-[#94a3b8] font-sans text-sm">{flag}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <button
+                onClick={handleNextChallenge}
+                className={`w-full font-[Syne] font-bold text-white rounded-full py-3 transition ${lastCorrect ? "bg-[#16a34a] hover:bg-[#15803d]" : "bg-[#ff3b3b] hover:bg-[#e13232]"}`}
+              >
+                {lastCorrect ? "NEXT THREAT →" : "UNDERSTOOD — NEXT THREAT →"}
+              </button>
+            </div>
           </div>
         )}
       </div>
 
-      {/* 4. DECISION BUTTONS */}
-      <div className="fixed bottom-0 w-full flex h-[64px] z-50 shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
-        <button 
-          disabled={answered}
-          onClick={() => handleAnswer("phishing")}
-          className="flex-1 bg-[var(--accent-danger)] text-white font-[Syne] font-bold uppercase disabled:opacity-50 transition-all hover:brightness-110 hover:shadow-[inset_0_0_20px_var(--glow-danger)]"
-        >
-          PHISHING
-        </button>
-        <button 
-          disabled={answered}
-          onClick={() => handleAnswer("legit")}
-          className="flex-1 bg-[var(--accent-safe)] text-[#0A0A14] font-[Syne] font-bold uppercase disabled:opacity-50 transition-all hover:brightness-110 hover:shadow-[inset_0_0_20px_var(--glow-safe)]"
-        >
-          LEGIT
-        </button>
-      </div>
+      {/* BOTTOM ACTION BAR */}
+      {!answered && (
+        <div className="fixed bottom-0 w-full h-[64px] z-50 flex shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
+          <button 
+            onClick={() => handleAnswer("phishing")}
+            className="flex-1 flex items-center justify-center bg-[#ff3b3b] text-white font-[Syne] font-bold uppercase tracking-widest text-sm transition-all hover:brightness-110 hover:shadow-[0_0_30px_rgba(255,59,59,0.3)]"
+          >
+            <ShieldX size={16} className="mr-2" />
+            PHISHING
+          </button>
+          <button 
+            onClick={() => handleAnswer("legit")}
+            className="flex-1 flex items-center justify-center bg-[#16a34a] text-white font-[Syne] font-bold uppercase tracking-widest text-sm transition-all hover:brightness-110 hover:shadow-[0_0_30px_rgba(22,163,74,0.3)]"
+          >
+            LEGIT
+            <ShieldCheck size={16} className="ml-2" />
+          </button>
+        </div>
+      )}
     </div>
   );
 }

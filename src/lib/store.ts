@@ -40,6 +40,7 @@ type GameActions = {
   setDifficulty: (value: "easy" | "medium" | "hard") => void;
   loadChallenges: (allChallenges: Challenge[], difficulty: "easy" | "medium" | "hard") => void;
   submitAnswer: (choice: "phishing" | "legit") => void;
+  nextChallenge: () => void;
   resetGame: () => void;
 };
 
@@ -115,21 +116,22 @@ export const useGameStore = create<GameStore>()(
           pointsAwarded,
         };
 
-        const isLast = state.currentIndex === state.challenges.length - 1;
+        set({
+          score: state.score + pointsAwarded,
+          answers: [...state.answers, answerRecord],
+          streak: newStreak,
+        });
+      },
 
+      nextChallenge: () => {
+        const state = get();
+        if (state.phase !== "playing") return;
+
+        const isLast = state.currentIndex === state.challenges.length - 1;
         if (isLast) {
-          set({
-            score: state.score + pointsAwarded,
-            answers: [...state.answers, answerRecord],
-            phase: "result",
-          });
+          set({ phase: "result" });
         } else {
-          set({
-            score: state.score + pointsAwarded,
-            answers: [...state.answers, answerRecord],
-            currentIndex: state.currentIndex + 1,
-            streak: newStreak,
-          });
+          set({ currentIndex: state.currentIndex + 1 });
         }
       },
 
