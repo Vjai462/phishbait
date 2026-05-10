@@ -23,16 +23,20 @@ export default function LeaderboardPage() {
   const [filter, setFilter] = useState<FilterType>("ALL");
 
   useEffect(() => {
-    getLeaderboard()
-      .then((data) => {
-        setEntries(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error(err);
-        setError("Failed to load leaderboard");
-        setLoading(false);
-      });
+    let cancelled = false;
+    const load = async () => {
+      try {
+        setLoading(true);
+        const data = await getLeaderboard();
+        if (!cancelled) setEntries(data);
+      } catch {
+        if (!cancelled) setError("Failed to load leaderboard");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+    load();
+    return () => { cancelled = true; };
   }, []);
 
   const filteredEntries = entries.filter((entry) => {

@@ -26,6 +26,12 @@ export default function GamePage() {
   const [timeLeft, setTimeLeft] = useState(30);
   const [answered, setAnswered] = useState(false);
   const [lastCorrect, setLastCorrect] = useState<boolean | null>(null);
+  const [isPaused, setIsPaused] = useState(false);
+  const isPausedRef = useRef(false);
+
+  useEffect(() => {
+    isPausedRef.current = isPaused;
+  }, [isPaused]);
 
   // Challenge Context
   const challenge = challenges[currentIndex];
@@ -62,6 +68,7 @@ export default function GamePage() {
       if (timerRef.current) clearInterval(timerRef.current);
       
       timerRef.current = setInterval(() => {
+        if (isPausedRef.current) return;
         setTimeLeft((prev) => {
           if (prev <= 1) {
             if (timerRef.current) clearInterval(timerRef.current);
@@ -153,6 +160,13 @@ export default function GamePage() {
               🔥 {streak}x
             </div>
           )}
+          <button
+            onClick={() => setIsPaused(true)}
+            className="ml-4 w-8 h-8 flex items-center justify-center rounded-full bg-[#ffffff10] text-white hover:bg-[#ffffff20] transition-colors border border-[#ffffff15] font-sans text-sm"
+            aria-label="Pause game"
+          >
+            ⏸
+          </button>
         </div>
       </div>
 
@@ -245,6 +259,40 @@ export default function GamePage() {
           >
             LEGIT
             <ShieldCheck size={16} className="ml-2" />
+          </button>
+        </div>
+      )}
+
+      {/* PAUSE OVERLAY */}
+      {isPaused && (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 100,
+          background: "rgba(0,0,0,0.85)",
+          display: "flex", flexDirection: "column",
+          alignItems: "center", justifyContent: "center", gap: "1.5rem"
+        }}>
+          <h2 style={{ color: "white", fontSize: "2rem", fontWeight: 700, letterSpacing: "0.1em" }} className="font-display">
+            PAUSED
+          </h2>
+          
+          <button onClick={() => setIsPaused(false)}
+            style={{ background: "#ef4444", color: "white", padding: "0.75rem 2.5rem",
+                     borderRadius: "999px", fontWeight: 700, fontSize: "1rem", border: "none", cursor: "pointer" }} className="font-display">
+            ▶ RESUME
+          </button>
+
+          <button onClick={() => { setIsPaused(false); window.location.reload(); }}
+            style={{ background: "transparent", color: "white", padding: "0.75rem 2.5rem",
+                     borderRadius: "999px", fontWeight: 700, fontSize: "1rem",
+                     border: "2px solid rgba(255,255,255,0.3)", cursor: "pointer" }} className="font-display">
+            ↺ RESTART
+          </button>
+
+          <button onClick={() => router.push("/")}
+            style={{ background: "transparent", color: "#aaa", padding: "0.75rem 2.5rem",
+                     borderRadius: "999px", fontWeight: 600, fontSize: "1rem",
+                     border: "2px solid rgba(255,255,255,0.15)", cursor: "pointer" }} className="font-display">
+            ✕ EXIT TO HOME
           </button>
         </div>
       )}
