@@ -133,11 +133,11 @@ export default function GamePage() {
           <span className="font-mono text-[#ff3b3b] text-sm tracking-widest ml-2 font-bold">PHISHBAIT</span>
         </div>
         <div className="font-mono text-[#64748b] text-xs tracking-widest absolute left-1/2 -translate-x-1/2">
-          THREAT {currentIndex + 1} OF 10
+          THREAT {currentIndex + 1} OF {challenges.length}
         </div>
         <div className="flex items-center">
           <div className="flex items-baseline">
-            <span className="font-[Syne] font-bold text-[#f59e0b] text-base">{score}</span>
+            <span className="font-display font-bold text-[#f59e0b] text-base">{score}</span>
             <span className="text-[#64748b] text-xs ml-1 font-mono">PTS</span>
           </div>
           {streak >= 3 && (
@@ -193,7 +193,7 @@ export default function GamePage() {
             <div className={`rounded-2xl p-5 border ${lastCorrect ? "bg-[#052e16]/80 border-[#16a34a]/40" : "bg-[#2d0a0a]/80 border-[#ff3b3b]/40"}`}>
               <div className="flex items-center gap-3">
                 {lastCorrect ? <CheckCircle2 size={20} color="#16a34a" /> : <XCircle size={20} color="#ff3b3b" />}
-                <span className={`font-[Syne] font-bold text-sm tracking-wide ${lastCorrect ? "text-[#16a34a]" : "text-[#ff3b3b]"}`}>
+                <span className={`font-display font-bold text-sm tracking-wide ${lastCorrect ? "text-[#16a34a]" : "text-[#ff3b3b]"}`}>
                   {lastCorrect ? "THREAT NEUTRALISED" : "BREACH DETECTED"}
                 </span>
               </div>
@@ -204,7 +204,7 @@ export default function GamePage() {
                   {challenge.redFlags.map((flag, i) => (
                     <div key={i} className="flex items-start gap-2">
                       <span className={lastCorrect ? "text-[#16a34a]" : "text-[#ff3b3b]"}>›</span>
-                      <span className="text-[#94a3b8] font-sans text-sm">{flag}</span>
+                      <span className="text-[#94a3b8] font-body text-sm">{flag}</span>
                     </div>
                   ))}
                 </div>
@@ -212,7 +212,7 @@ export default function GamePage() {
 
               <button
                 onClick={handleNextChallenge}
-                className={`w-full font-[Syne] font-bold text-white rounded-full py-3 transition ${lastCorrect ? "bg-[#16a34a] hover:bg-[#15803d]" : "bg-[#ff3b3b] hover:bg-[#e13232]"}`}
+                className={`w-full font-display font-bold text-white rounded-full py-3 transition ${lastCorrect ? "bg-[#16a34a] hover:bg-[#15803d]" : "bg-[#ff3b3b] hover:bg-[#e13232]"}`}
               >
                 {lastCorrect ? "NEXT THREAT →" : "UNDERSTOOD — NEXT THREAT →"}
               </button>
@@ -226,14 +226,14 @@ export default function GamePage() {
         <div className="fixed bottom-0 w-full h-[64px] z-50 flex shadow-[0_-10px_30px_rgba(0,0,0,0.5)]">
           <button 
             onClick={() => handleAnswer("phishing")}
-            className="flex-1 flex items-center justify-center bg-[#ff3b3b] text-white font-[Syne] font-bold uppercase tracking-widest text-sm transition-all hover:brightness-110 hover:shadow-[0_0_30px_rgba(255,59,59,0.3)]"
+            className="flex-1 flex items-center justify-center bg-[#ff3b3b] text-white font-display font-bold uppercase tracking-widest text-sm transition-all hover:brightness-110 hover:shadow-[0_0_30px_rgba(255,59,59,0.3)]"
           >
             <ShieldX size={16} className="mr-2" />
             PHISHING
           </button>
           <button 
             onClick={() => handleAnswer("legit")}
-            className="flex-1 flex items-center justify-center bg-[#16a34a] text-white font-[Syne] font-bold uppercase tracking-widest text-sm transition-all hover:brightness-110 hover:shadow-[0_0_30px_rgba(22,163,74,0.3)]"
+            className="flex-1 flex items-center justify-center bg-[#16a34a] text-white font-display font-bold uppercase tracking-widest text-sm transition-all hover:brightness-110 hover:shadow-[0_0_30px_rgba(22,163,74,0.3)]"
           >
             LEGIT
             <ShieldCheck size={16} className="ml-2" />
