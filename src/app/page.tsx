@@ -30,21 +30,21 @@ const features = [
     icon: <Shield size={32} strokeWidth={2.5} className="text-white/90" />,
     delay: 0.1,
     description: "Face actual phishing emails, URLs and SMS cloned from real attack patterns used in the wild.",
-    gradient: "linear-gradient(137deg, #FF3D77 0%, #FFB1CE 45%, #FF9D3C 100%)"
+    glowColor: "rgba(239, 68, 68, 0.35)"
   },
   {
     title: "Instant Feedback",
     icon: <Zap size={32} strokeWidth={2.5} className="text-white/90" />,
     delay: 0.2,
     description: "Every answer reveals why it was phishing or legit. Learn the red flags as you play.",
-    gradient: "linear-gradient(137deg, #FFFFFF 0%, #7DD3FC 45%, #06B6D4 100%)"
+    glowColor: "rgba(6, 182, 212, 0.35)"
   },
   {
     title: "Global Leaderboard",
     icon: <Trophy size={32} strokeWidth={2.5} className="text-white/90" />,
     delay: 0.3,
     description: "Compete with agents worldwide. Streak bonuses, difficulty tiers and score rankings.",
-    gradient: "linear-gradient(137deg, #4361EE 0%, #E0AEFF 45%, #F72585 100%)"
+    glowColor: "rgba(168, 85, 247, 0.35)"
   }
 ];
 
@@ -52,40 +52,40 @@ interface FeatureCardProps {
   title: string;
   description: string;
   icon: React.ReactNode;
-  gradient: string;
+  glowColor: string;
   delay: number;
 }
 
-function FeatureCard({ title, description, icon, gradient, delay }: FeatureCardProps) {
+function FeatureCard({ title, description, icon, glowColor, delay }: FeatureCardProps) {
+  const [isHovered, setIsHovered] = React.useState(false);
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8, ease: "easeOut", delay }}
-      className="relative flex flex-col justify-start items-start w-full max-w-[300px] group mx-auto"
+      className="relative flex flex-col justify-start items-start w-full max-w-[300px] mx-auto"
     >
-      {/* Glow */}
       <div 
-        className="absolute w-full h-[260px] opacity-50 rounded-[40px] pointer-events-none blur-[45px]"
-        style={{ background: gradient }}
-      />
-      {/* Foreground */}
-      <div 
-        className="relative w-full h-[260px] rounded-[40px] z-10 overflow-hidden border-[8px] border-transparent"
+        className="relative w-full h-[260px] rounded-[40px] z-10 overflow-hidden flex flex-col justify-between p-7"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
         style={{ 
-          background: `linear-gradient(#13131f, #13131f) padding-box, ${gradient} border-box`
+          background: isHovered ? "rgba(255,255,255,0.05)" : "rgba(255, 255, 255, 0.03)",
+          border: isHovered ? "1px solid rgba(255,255,255,0.15)" : "1px solid rgba(255, 255, 255, 0.08)",
+          boxShadow: isHovered ? `0 0 32px ${glowColor}` : "none",
+          transform: isHovered ? "translateY(-4px)" : "translateY(0)",
+          transition: "all 300ms ease"
         }}
       >
-        <div className="p-7 flex flex-col justify-between w-full h-full">
-          <div>{icon}</div>
-          <div>
-            <h3 className="text-xl text-white tracking-tight mb-2" style={{ fontFamily: "'Syne', sans-serif", fontWeight: 600 }}>
-              {title}
-            </h3>
-            <p className="text-[14px] text-[#94a3b8] leading-relaxed" style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 400 }}>
-              {description}
-            </p>
-          </div>
+        <div>{icon}</div>
+        <div>
+          <h3 className="text-xl text-white tracking-tight mb-2" style={{ fontFamily: "'Syne', sans-serif", fontWeight: 600 }}>
+            {title}
+          </h3>
+          <p className="text-[14px] text-[#94a3b8] leading-relaxed" style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 400 }}>
+            {description}
+          </p>
         </div>
       </div>
     </motion.div>
@@ -136,8 +136,20 @@ export default function LandingPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.7, ease: "easeOut" }}
             >
-              <div className="inline-flex items-center gap-2 bg-[#ff3b3b]/10 border border-[#ff3b3b]/20 text-[#ff3b3b] text-[11px] rounded-full px-3 py-1 font-mono">
-                🎣 PHISHING AWARENESS TRAINING
+              <div 
+                className="inline-flex items-center gap-2 font-mono"
+                style={{
+                  background: "rgba(255, 255, 255, 0.08)",
+                  border: "1px solid rgba(255, 255, 255, 0.2)",
+                  color: "#ffffff",
+                  fontSize: "0.7rem",
+                  letterSpacing: "0.12em",
+                  padding: "0.35rem 0.85rem",
+                  borderRadius: "999px",
+                  fontWeight: 600
+                }}
+              >
+                <span className="text-white/80">🎣</span> PHISHING AWARENESS TRAINING
               </div>
               <h1 className="text-[42px] md:text-[60px] text-white leading-tight mt-4" style={{ fontFamily: "'Syne', sans-serif", fontWeight: 700 }}>
                 Can you spot<br/>the phish?
@@ -177,23 +189,59 @@ export default function LandingPage() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4, duration: 0.6 }}
-            className="absolute bottom-10 left-1/2 -translate-x-1/2 z-30 flex items-center bg-white/5 backdrop-blur-2xl px-1.5 py-1.5 rounded-full shadow-[0_12px_40px_rgba(0,0,0,0.3)] border border-white/10"
+            className="absolute bottom-10 left-1/2 -translate-x-1/2 z-30 flex items-center"
+            style={{
+              background: "rgba(15, 15, 15, 0.75)",
+              backdropFilter: "blur(16px)",
+              border: "1px solid rgba(255, 255, 255, 0.1)",
+              borderRadius: "999px",
+              padding: "0.5rem 0.75rem",
+              gap: "0.25rem",
+              boxShadow: "0 8px 32px rgba(0,0,0,0.4)"
+            }}
           >
             <div className="w-9 h-9 rounded-full bg-[#ff3b3b]/20 border border-[#ff3b3b]/30 flex items-center justify-center text-[#ff3b3b] text-lg mr-2 shrink-0">
               🎣
             </div>
-            <button className="text-[12px] font-semibold text-slate-400 hover:text-white px-4 py-2 transition-colors shrink-0">
+            <button 
+              className="text-[rgba(255,255,255,0.7)] hover:text-white hover:bg-[rgba(255,255,255,0.08)] transition-all duration-150 ease shrink-0"
+              style={{
+                fontSize: "0.875rem",
+                fontWeight: 500,
+                padding: "0.5rem 1rem",
+                borderRadius: "999px",
+                backgroundColor: "transparent"
+              }}
+            >
               How it works
             </button>
             <button 
               onClick={() => router.push("/leaderboard")}
-              className="text-[12px] font-semibold text-slate-400 hover:text-white px-4 py-2 transition-colors shrink-0 mr-2"
+              className="text-[rgba(255,255,255,0.7)] hover:text-white hover:bg-[rgba(255,255,255,0.08)] transition-all duration-150 ease shrink-0"
+              style={{
+                fontSize: "0.875rem",
+                fontWeight: 500,
+                padding: "0.5rem 1rem",
+                borderRadius: "999px",
+                backgroundColor: "transparent"
+              }}
             >
               Leaderboard
             </button>
+            
+            <div style={{ width: "1px", height: "20px", background: "rgba(255,255,255,0.15)", margin: "0 0.25rem" }} />
+
             <button 
               onClick={user ? () => router.push("/play") : handleGoogleSignIn}
-              className="bg-[#ff3b3b] text-white px-5 py-2 rounded-full text-[12px] font-bold hover:bg-[#cc2e2e] transition-all shrink-0"
+              className="bg-[#ef4444] hover:bg-[#dc2626] text-white transition-colors shrink-0"
+              style={{
+                fontWeight: 700,
+                fontSize: "0.875rem",
+                padding: "0.5rem 1.25rem",
+                borderRadius: "999px",
+                border: "none",
+                boxShadow: "none"
+              }}
             >
               {user ? "Play" : "Sign In & Play"} →
             </button>
@@ -262,7 +310,7 @@ export default function LandingPage() {
               title={feat.title}
               description={feat.description}
               icon={feat.icon}
-              gradient={feat.gradient}
+              glowColor={feat.glowColor}
               delay={feat.delay}
             />
           ))}
