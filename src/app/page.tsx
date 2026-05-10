@@ -3,6 +3,9 @@
 import React from "react";
 import { useRouter } from "next/navigation";
 import { motion } from "motion/react";
+import { useAuth } from "@/context/AuthContext";
+import { signInWithPopup, signOut } from "firebase/auth";
+import { auth, googleProvider } from "@/lib/firebase";
 import { Shield, Zap, Trophy } from "lucide-react";
 
 import Image from "next/image";
@@ -91,6 +94,20 @@ function FeatureCard({ title, description, icon, gradient, delay }: FeatureCardP
 
 export default function LandingPage() {
   const router = useRouter();
+  const { user } = useAuth();
+
+  const handleGoogleSignIn = async () => {
+    try {
+      await signInWithPopup(auth, googleProvider);
+      router.push("/play");
+    } catch (err) {
+      console.error("Sign in failed", err);
+    }
+  };
+
+  const handleGuestPlay = () => {
+    router.push("/play?guest=true");
+  };
 
   return (
     <div className="min-h-screen bg-[var(--bg-void)] overflow-x-hidden pt-8 pb-12">
@@ -128,13 +145,30 @@ export default function LandingPage() {
               <p className="text-[15px] md:text-[16px] text-[#94a3b8] max-w-[480px] mt-3" style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 400 }}>
                 10 challenges. 60 seconds each. Train your instincts against real-world phishing attacks before they train you.
               </p>
-              <motion.button
-                whileHover={{ scale: 1.04, boxShadow: "0 0 30px rgba(255,59,59,0.4)" }}
-                onClick={() => router.push("/play")}
-                className="bg-[#ff3b3b] text-white font-bold rounded-full px-8 py-3 mt-8 text-[15px] transition-colors"
-              >
-                Start Training →
-              </motion.button>
+              <div className="flex flex-wrap items-center gap-4 mt-8">
+                <motion.button
+                  whileHover={{ scale: 1.04, backgroundColor: "rgba(255,255,255,0.05)" }}
+                  onClick={handleGuestPlay}
+                  className="bg-transparent border border-white/20 text-white font-bold rounded-full px-8 py-3 text-[15px] transition-colors"
+                >
+                  Play as Guest
+                </motion.button>
+                <motion.button
+                  whileHover={{ scale: 1.04, boxShadow: "0 0 30px rgba(255,59,59,0.4)" }}
+                  onClick={user ? () => router.push("/play") : handleGoogleSignIn}
+                  className="bg-[#ff3b3b] text-white font-bold rounded-full px-8 py-3 text-[15px] transition-colors"
+                >
+                  {user ? `Continue as ${user.displayName?.split(" ")[0]}` : "Sign in with Google"}
+                </motion.button>
+              </div>
+              {user && (
+                <button 
+                  onClick={() => signOut(auth)} 
+                  className="text-xs text-[#64748b] hover:text-white mt-4 underline underline-offset-2 transition-colors"
+                >
+                  Sign out
+                </button>
+              )}
             </motion.div>
           </div>
 
@@ -158,10 +192,10 @@ export default function LandingPage() {
               Leaderboard
             </button>
             <button 
-              onClick={() => router.push("/play")}
+              onClick={user ? () => router.push("/play") : handleGoogleSignIn}
               className="bg-[#ff3b3b] text-white px-5 py-2 rounded-full text-[12px] font-bold hover:bg-[#cc2e2e] transition-all shrink-0"
             >
-              Play Free →
+              {user ? "Play" : "Sign In & Play"} →
             </button>
           </motion.nav>
 
@@ -243,13 +277,22 @@ export default function LandingPage() {
         <p className="text-[15px] text-[#64748b] mt-2" style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 400 }}>
           It takes 60 seconds. No signup.
         </p>
-        <motion.button
-          whileHover={{ scale: 1.04, boxShadow: "0 0 30px rgba(255,59,59,0.4)" }}
-          onClick={() => router.push("/play")}
-          className="bg-[#ff3b3b] text-white font-bold rounded-full px-10 py-4 mt-8 text-[15px] transition-colors"
-        >
-          Play Now — It&apos;s Free
-        </motion.button>
+        <div className="flex flex-wrap items-center justify-center gap-4 mt-8">
+          <motion.button
+            whileHover={{ scale: 1.04, backgroundColor: "rgba(255,255,255,0.05)" }}
+            onClick={handleGuestPlay}
+            className="bg-transparent border border-white/20 text-white font-bold rounded-full px-10 py-4 text-[15px] transition-colors"
+          >
+            Play as Guest
+          </motion.button>
+          <motion.button
+            whileHover={{ scale: 1.04, boxShadow: "0 0 30px rgba(255,59,59,0.4)" }}
+            onClick={user ? () => router.push("/play") : handleGoogleSignIn}
+            className="bg-[#ff3b3b] text-white font-bold rounded-full px-10 py-4 text-[15px] transition-colors"
+          >
+            {user ? `Continue as ${user.displayName?.split(" ")[0]}` : "Sign in with Google"}
+          </motion.button>
+        </div>
       </section>
 
     </div>

@@ -1,9 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useGameStore } from "@/lib/store";
-import { submitScore } from "@/lib/firebase";
+import { submitScore, auth, googleProvider } from "@/lib/firebase";
+import { useAuth } from "@/context/AuthContext";
+import { signInWithPopup } from "firebase/auth";
 
 export default function ResultsPage() {
   const router = useRouter();
@@ -13,8 +15,8 @@ export default function ResultsPage() {
   const callsign = useGameStore((state) => state.callsign);
   const difficulty = useGameStore((state) => state.difficulty);
   const resetGame = useGameStore((state) => state.resetGame);
-
-  const [hasSubmitted, setHasSubmitted] = useState(false);
+  const { user } = useAuth();
+  const [isSaved, setIsSaved] = useState(false);
 
   const totalQuestions = answers.length;
   const correctCount = answers.filter((a) => a.correct).length;
@@ -26,8 +28,13 @@ export default function ResultsPage() {
     }
   }, [answers.length, router]);
 
+  const hasSubmittedRef = useRef(false);
+
   useEffect(() => {
-    if (!answers.length || hasSubmitted) return;
+    if (!answers.length) return;
+    if (!user) return; // guest - don't submit
+    if (hasSubmittedRef.current) return;
+    hasSubmittedRef.current = true;
 
     const diff = difficulty || "easy";
     const agentCallsign = callsign || "Unknown";
@@ -38,16 +45,17 @@ export default function ResultsPage() {
       accuracy,
       difficulty: diff,
       createdAt: Date.now()
-    }).catch(() => {}).finally(() => {
-      setHasSubmitted(true);
-    });
-  }, [answers.length, hasSubmitted, score, accuracy, difficulty, callsign]);
+    }).then(() => {
+      setIsSaved(true);
+    }).catch(() => {});
+  }, [answers.length, score, accuracy, difficulty, callsign, user]);
 
   if (answers.length === 0) {
     return null; // Prevents NaN flashing while redirecting
   }
 
   const handlePlayAgain = () => {
+    hasSubmittedRef.current = false;
     resetGame();
     router.push("/play");
   };
@@ -81,6 +89,43 @@ export default function ResultsPage() {
             {correctCount} / {totalQuestions} correct
           </div>
         </div>
+
+        {!user && (
+          <div style={{
+            marginTop: "1.5rem",
+            padding: "1rem 1.5rem",
+            background: "rgba(255,255,255,0.05)",
+            borderRadius: "12px",
+            border: "1px solid rgba(255,255,255,0.1)",
+            textAlign: "center"
+          }}>
+            <p style={{ color: "#aaa", marginBottom: "0.75rem", fontSize: "0.9rem" }}>
+              Want to save your score and track your progress?
+            </p>
+            <button
+              onClick={async () => {
+                await signInWithPopup(auth, googleProvider);
+              }}
+              style={{
+                background: "#ef4444",
+                color: "white",
+                padding: "0.6rem 1.5rem",
+                borderRadius: "999px",
+                fontWeight: 700,
+                border: "none",
+                cursor: "pointer",
+                fontSize: "0.9rem"
+              }}>
+              Sign in with Google to Save Score
+            </button>
+          </div>
+        )}
+
+        {user && isSaved && (
+          <div className="mt-4 text-center text-[#16a34a] font-mono text-sm">
+            Saved to leaderboard ✓
+          </div>
+        )}
 
         <div className="mt-[32px] flex gap-3">
           <button 

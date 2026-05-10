@@ -1,5 +1,6 @@
 import { initializeApp, getApps } from "firebase/app";
 import { getDatabase } from "firebase/database";
+import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -19,6 +20,8 @@ function getFirebaseApp() {
 }
 
 export const db = getDatabase(getFirebaseApp());
+export const auth = getAuth(getFirebaseApp());
+export const googleProvider = new GoogleAuthProvider();
 
 export type LeaderboardEntry = {
   callsign: string;
