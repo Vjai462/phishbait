@@ -1,5 +1,5 @@
 import { initializeApp, getApps } from "firebase/app";
-import { getDatabase, ref, push, query, orderByChild, limitToLast, DataSnapshot, get } from "firebase/database";
+import { getDatabase } from "firebase/database";
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -28,41 +28,36 @@ export type LeaderboardEntry = {
   createdAt: number;
 };
 
-export async function submitScore(entry: LeaderboardEntry) {
-  const sanitizedCallsign = entry.callsign.replace(/[^a-zA-Z0-9\-_]/g, '').slice(0, 20);
-  
-  if (!sanitizedCallsign) return;
-
-  const score = Math.max(0, Math.min(30000, entry.score));
-  const accuracy = Math.max(0, Math.min(100, entry.accuracy));
-
-  const validatedData: LeaderboardEntry = {
-    callsign: sanitizedCallsign,
-    score,
-    accuracy,
-    difficulty: entry.difficulty,
-    createdAt: entry.createdAt,
-  };
-
-  await push(ref(db, "leaderboard"), validatedData);
+export async function submitScore(data: {
+  callsign: string;
+  score: number;
+  accuracy: number;
+  difficulty: string;
+  createdAt: number;
+}): Promise<void> {
+  const { getDatabase, ref, push } = await import("firebase/database");
+  const db = getDatabase();
+  await push(ref(db, "leaderboard"), data);
 }
 
-export async function getTopScores(limit = 10) {
-  const q = query(ref(db, "leaderboard"), orderByChild("score"), limitToLast(limit));
-  const snapshot = await get(q);
-  
-  const results: (LeaderboardEntry & { id: string })[] = [];
-  
-  if (snapshot.exists()) {
-    snapshot.forEach((child: DataSnapshot) => {
-      results.push({
-        id: child.key as string,
-        ...(child.val() as LeaderboardEntry)
-      });
-    });
-  }
-  
-  // Sort descending by score
-  results.sort((a, b) => b.score - a.score);
-  return results;
+export async function getLeaderboard(): Promise<Array<{
+  id: string;
+  callsign: string;
+  score: number;
+  accuracy: number;
+  difficulty: string;
+  createdAt: number;
+}>> {
+  const { getDatabase, ref, get, query, orderByChild, limitToLast } = await import("firebase/database");
+  const db = getDatabase();
+  const snapshot = await get(
+    query(ref(db, "leaderboard"), orderByChild("score"), limitToLast(20))
+  );
+  if (!snapshot.exists()) return [];
+  const entries: Array<{ id: string; callsign: string; score: number; accuracy: number; difficulty: string; createdAt: number }> = [];
+  snapshot.forEach((child: import("firebase/database").DataSnapshot) => {
+    const val = child.val() as LeaderboardEntry;
+    entries.push({ id: child.key as string, ...val });
+  });
+  return entries.reverse();
 }
