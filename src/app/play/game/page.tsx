@@ -1,17 +1,21 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { useGameStore, type Challenge } from "@/lib/store";
 import challengesData from "@/data/challenges.json";
 import { ShieldAlert, ShieldX, ShieldCheck, CheckCircle2, XCircle } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+import { signInWithPopup } from "firebase/auth";
+import { auth, googleProvider } from "@/lib/firebase";
 
 // Type assertion for challengesData since we're loading directly from JSON
 const typedChallenges = challengesData as Challenge[];
 
 export default function GamePage() {
   const router = useRouter();
+  const { user } = useAuth();
   
   // Store
   const phase = useGameStore((state) => state.phase);
@@ -27,7 +31,15 @@ export default function GamePage() {
   const [answered, setAnswered] = useState(false);
   const [lastCorrect, setLastCorrect] = useState<boolean | null>(null);
   const [isPaused, setIsPaused] = useState(false);
+  const [isTyping, setIsTyping] = useState(true);
+  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [authLoading, setAuthLoading] = useState(false);
   const isPausedRef = useRef(false);
+  const answersHistoryRef = useRef<unknown[]>([]);
+
+  const handleTypingComplete = useCallback(() => {
+    setIsTyping(false);
+  }, []);
 
   useEffect(() => {
     isPausedRef.current = isPaused;
@@ -54,6 +66,7 @@ export default function GamePage() {
 
   useEffect(() => {
     if (phase === "result") {
+      sessionStorage.setItem("phishbait_debrief", JSON.stringify(answersHistoryRef.current));
       router.push("/results");
     }
   }, [phase, router]);
@@ -62,29 +75,50 @@ export default function GamePage() {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    if (challenge && !answered) {
+    if (challenge) {
+      setIsTyping(true);
       setTimeLeft(challenge.timeLimit);
-      
-      if (timerRef.current) clearInterval(timerRef.current);
-      
-      timerRef.current = setInterval(() => {
-        if (isPausedRef.current) return;
-        setTimeLeft((prev) => {
-          if (prev <= 1) {
-            if (timerRef.current) clearInterval(timerRef.current);
-            // Auto-answer on timeout, intentionally picking the wrong answer
-            handleAnswer("legit", true); 
-            return 0;
-          }
-          return prev - 1;
-        });
-      }, 1000);
     }
+  }, [challenge, setIsTyping]);
+
+  useEffect(() => {
+    if (!challenge || answered || isTyping || showAuthModal) return;
+    
+    if (timerRef.current) clearInterval(timerRef.current);
+    
+    timerRef.current = setInterval(() => {
+      if (isPausedRef.current) return;
+      setTimeLeft((prev) => {
+        if (prev <= 1) {
+          if (timerRef.current) clearInterval(timerRef.current);
+          // Auto-answer on timeout, intentionally picking the wrong answer
+          handleAnswer("legit", true); 
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
     
     return () => {
       if (timerRef.current) clearInterval(timerRef.current);
     };
-  }, [challenge, answered]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [challenge, answered, isTyping, showAuthModal]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const handleGoogleSignIn = async () => {
+    setAuthLoading(true);
+    try {
+      await signInWithPopup(auth, googleProvider);
+      setShowAuthModal(false);
+    } catch (e: unknown) {
+      console.error(e);
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const handleDismissModal = () => {
+    setShowAuthModal(false);
+  };
 
   const handleNextChallenge = () => {
     nextChallenge();
@@ -105,6 +139,21 @@ export default function GamePage() {
     const correct = (finalChoice === "phishing" && challenge.isPhishing) || 
                     (finalChoice === "legit" && !challenge.isPhishing);
                     
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const data = challenge.data as Record<string, any>;
+    const subject = data.subject || data.url || data.from || "Unknown Threat";
+
+    answersHistoryRef.current.push({
+      id: challenge.id || currentIndex.toString(),
+      subject,
+      isPhishing: challenge.isPhishing,
+      userAnswer: finalChoice === "phishing",
+      correct,
+      redFlags: challenge.redFlags || [],
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      explanation: (challenge as any).explanation || "",
+    });
+                    
     setLastCorrect(correct);
     submitAnswer(finalChoice);
     
@@ -123,6 +172,16 @@ export default function GamePage() {
 
   return (
     <div className="min-h-screen bg-[#0A0A14] relative pb-[100px] overflow-x-hidden">
+      <style>{`
+        @keyframes pulse {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.3; transform: scale(0.85); }
+        }
+        @keyframes blink {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0; }
+        }
+      `}</style>
       {/* BACKGROUND */}
       <div style={{ position:"absolute", inset:0, zIndex:0, overflow:"hidden" }}>
         <Image
@@ -160,6 +219,39 @@ export default function GamePage() {
               🔥 {streak}x
             </div>
           )}
+          
+          {!user ? (
+            <button
+              onClick={() => { setShowAuthModal(true); }}
+              style={{
+                background: "rgba(34, 211, 170, 0.1)",
+                border: "1px solid rgba(34, 211, 170, 0.3)",
+                color: "#22d3aa",
+                fontFamily: "monospace",
+                fontSize: "0.7rem",
+                fontWeight: 700,
+                letterSpacing: "0.1em",
+                padding: "0.3rem 0.8rem",
+                borderRadius: "999px",
+                cursor: "pointer",
+                textTransform: "uppercase",
+                marginLeft: "1rem"
+              }}
+            >
+              ⚡ Sign In
+            </button>
+          ) : (
+            <span style={{
+              fontFamily: "monospace",
+              fontSize: "0.7rem",
+              color: "rgba(34, 211, 170, 0.6)",
+              letterSpacing: "0.08em",
+              marginLeft: "1rem"
+            }}>
+              {user.displayName?.split(" ")[0]?.toUpperCase()}
+            </span>
+          )}
+
           <button
             onClick={() => setIsPaused(true)}
             className="ml-4 w-8 h-8 flex items-center justify-center rounded-full bg-[#ffffff10] text-white hover:bg-[#ffffff20] transition-colors border border-[#ffffff15] font-sans text-sm"
@@ -186,26 +278,35 @@ export default function GamePage() {
       <div className="pt-20 pb-32 min-h-screen flex flex-col items-center justify-center relative z-10 w-full">
         
         {/* THREAT CONTEXT LABEL */}
-        <div className="mb-4 bg-[#ff3b3b]/10 border border-[#ff3b3b]/20 text-[#ff3b3b] font-mono text-[10px] tracking-widest px-3 py-1 rounded-full">
-          {challenge.type === "email" ? "⚠ SUSPICIOUS EMAIL INTERCEPTED" : 
-           challenge.type === "url" ? "⚠ MALICIOUS LINK DETECTED" : 
-           "⚠ SUSPICIOUS SMS RECEIVED"}
+        <div style={{
+          background: "rgba(239, 68, 68, 0.15)",
+          border: "1px solid rgba(239, 68, 68, 0.4)",
+          color: "#fca5a5",
+          fontFamily: "monospace",
+          fontSize: "0.7rem",
+          letterSpacing: "0.15em",
+          padding: "0.35rem 1rem",
+          borderRadius: "999px",
+          animation: "pulse 2s ease-in-out infinite",
+          marginBottom: "1rem"
+        }}>
+          ⚠ INTERCEPTED TRANSMISSION
         </div>
 
         {/* CHALLENGE CARD */}
         <div className={`w-full max-w-[680px] mx-auto px-4 ${!lastCorrect && answered ? "anim-shake" : ""}`}>
           <div 
-            className="bg-[rgba(15,15,30,0.95)] border border-[rgba(255,255,255,0.08)] rounded-[16px] backdrop-blur-sm border-t-[2px] border-t-[#ff3b3b] overflow-hidden p-[1px]"
             style={{
-              boxShadow: (answered && lastCorrect === false) 
-                ? "0 0 0 1px rgba(255,59,59,0.4), 0 24px 60px rgba(0,0,0,0.5)" 
-                : "0 0 0 1px rgba(255,59,59,0.05), 0 24px 60px rgba(0,0,0,0.5)",
-              borderColor: (answered && lastCorrect === false) ? "rgba(255,59,59,0.4)" : "rgba(255,255,255,0.08)"
+              background: "rgba(6, 10, 18, 0.95)",
+              border: "1px solid rgba(34, 211, 170, 0.25)",
+              borderRadius: "12px",
+              padding: "0",
+              overflow: "hidden",
+              boxShadow: "0 0 40px rgba(34, 211, 170, 0.08), 0 4px 24px rgba(0,0,0,0.6)",
+              position: "relative"
             }}
           >
-            {challenge.type === "email" && <EmailCard challenge={challenge} />}
-            {challenge.type === "url" && <UrlCard challenge={challenge} />}
-            {challenge.type === "sms" && <SmsCard challenge={challenge} />}
+            <TerminalCard challenge={challenge} onTypingComplete={handleTypingComplete} />
           </div>
         </div>
 
@@ -296,111 +397,221 @@ export default function GamePage() {
           </button>
         </div>
       )}
+
+      {showAuthModal && (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 999,
+          background: "rgba(0,0,0,0.75)",
+          backdropFilter: "blur(8px)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          padding: "1rem"
+        }}
+        onClick={handleDismissModal}
+        >
+          <div
+            onClick={e => e.stopPropagation()}
+            style={{
+              background: "rgba(6, 10, 18, 0.98)",
+              border: "1px solid rgba(34, 211, 170, 0.25)",
+              borderRadius: "16px",
+              padding: "2rem 1.75rem",
+              width: "100%",
+              maxWidth: "360px",
+              boxShadow: "0 0 60px rgba(34,211,170,0.08), 0 24px 48px rgba(0,0,0,0.6)",
+              textAlign: "center"
+            }}
+          >
+            {/* Terminal header */}
+            <div style={{ display: "flex", gap: 6, marginBottom: "1.25rem" }}>
+              <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#ff5f57", display: "inline-block" }} />
+              <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#febc2e", display: "inline-block" }} />
+              <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#28c840", display: "inline-block" }} />
+            </div>
+
+            {/* Icon */}
+            <div style={{ fontSize: "2rem", marginBottom: "0.75rem" }}>🔐</div>
+
+            {/* Title */}
+            <h3 style={{
+              color: "white", fontSize: "1.1rem", fontWeight: 700,
+              marginBottom: "0.5rem", fontFamily: "monospace"
+            }}>
+              AGENT AUTHENTICATION
+            </h3>
+
+            {/* Subtitle */}
+            <p style={{
+              color: "rgba(255,255,255,0.45)", fontSize: "0.82rem",
+              marginBottom: "0.4rem", lineHeight: 1.5
+            }}>
+              ⏸ Timer paused
+            </p>
+            <p style={{
+              color: "rgba(255,255,255,0.45)", fontSize: "0.82rem",
+              marginBottom: "1.5rem", lineHeight: 1.5
+            }}>
+              Sign in to save your score to the global leaderboard.
+              Your progress is safe.
+            </p>
+
+            {/* Google Sign In button */}
+            <button
+              onClick={handleGoogleSignIn}
+              disabled={authLoading}
+              style={{
+                width: "100%",
+                background: authLoading ? "rgba(255,255,255,0.05)" : "#ffffff",
+                color: "#1a1a1a",
+                fontWeight: 700,
+                fontSize: "0.9rem",
+                padding: "0.75rem 1.5rem",
+                borderRadius: "999px",
+                border: "none",
+                cursor: authLoading ? "not-allowed" : "pointer",
+                marginBottom: "0.75rem",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "0.5rem",
+                opacity: authLoading ? 0.6 : 1
+              }}
+            >
+              {/* Google G icon */}
+              <svg width="18" height="18" viewBox="0 0 48 48">
+                <path fill="#FFC107" d="M43.611 20.083H42V20H24v8h11.303c-1.649 4.657-6.08 8-11.303 8-6.627 0-12-5.373-12-12s5.373-12 12-12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 12.955 4 4 12.955 4 24s8.955 20 20 20 20-8.955 20-20c0-1.341-.138-2.65-.389-3.917z"/>
+                <path fill="#FF3D00" d="m6.306 14.691 6.571 4.819C14.655 15.108 18.961 12 24 12c3.059 0 5.842 1.154 7.961 3.039l5.657-5.657C34.046 6.053 29.268 4 24 4 16.318 4 9.656 8.337 6.306 14.691z"/>
+                <path fill="#4CAF50" d="M24 44c5.166 0 9.86-1.977 13.409-5.192l-6.19-5.238A11.91 11.91 0 0 1 24 36c-5.202 0-9.619-3.317-11.283-7.946l-6.522 5.025C9.505 39.556 16.227 44 24 44z"/>
+                <path fill="#1976D2" d="M43.611 20.083H42V20H24v8h11.303a12.04 12.04 0 0 1-4.087 5.571l.003-.002 6.19 5.238C36.971 39.205 44 34 44 24c0-1.341-.138-2.65-.389-3.917z"/>
+              </svg>
+              {authLoading ? "Signing in..." : "Continue with Google"}
+            </button>
+
+            {/* Dismiss / continue as guest */}
+            <button
+              onClick={handleDismissModal}
+              style={{
+                width: "100%",
+                background: "transparent",
+                border: "1px solid rgba(255,255,255,0.1)",
+                color: "rgba(255,255,255,0.45)",
+                fontSize: "0.82rem",
+                padding: "0.6rem 1.5rem",
+                borderRadius: "999px",
+                cursor: "pointer"
+              }}
+            >
+              Continue as Guest → Resume game
+            </button>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
 
 // Sub-components
 
-function EmailCard({ challenge }: { challenge: Challenge }) {
-  const [showFullLink, setShowFullLink] = useState(false);
+function TerminalCard({ challenge, onTypingComplete }: { challenge: Challenge; onTypingComplete: () => void }) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const data = challenge.data as Record<string, any>;
-  
-  const initials = data.senderName 
-    ? data.senderName.substring(0, 2).toUpperCase() 
-    : "??";
+  let sender = "UNKNOWN";
+  let fullText = "";
 
-  const getAvatarColor = (name: string) => {
-    let hash = 0;
-    for (let i = 0; i < name.length; i++) {
-      hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  if (challenge.type === "email") {
+    sender = data.senderName || "EMAIL";
+    fullText = `FROM: ${data.senderName} <${data.senderEmail}>\nSUBJECT: ${data.subject}\n----------------------------------------\n\n${data.body}`;
+    if (data.linkUrl) {
+      fullText += `\n\n[LINK DETECTED]: ${data.linkUrl}`;
     }
-    const hue = Math.abs(hash) % 360;
-    return `hsl(${hue}, 60%, 40%)`;
-  };
+  } else if (challenge.type === "url") {
+    sender = "WEB_SCANNER";
+    fullText = `CONTEXT: ${data.context}\n----------------------------------------\n\n[TARGET URL]: ${data.url}`;
+  } else if (challenge.type === "sms") {
+    sender = data.from || "SMS";
+    fullText = data.body;
+  }
 
-  const paragraphs = data.body ? data.body.split("\n").filter((p: string) => p.trim() !== "") : [];
+  const [displayedText, setDisplayedText] = useState("");
+  const [charIndex, setCharIndex] = useState(0);
+
+  useEffect(() => {
+    setDisplayedText("");
+    setCharIndex(0);
+  }, [challenge]);
+
+  useEffect(() => {
+    if (charIndex < fullText.length) {
+      const timer = setTimeout(() => {
+        setDisplayedText((prev) => prev + fullText[charIndex]);
+        setCharIndex((prev) => prev + 1);
+      }, 18);
+      return () => clearTimeout(timer);
+    } else {
+      onTypingComplete();
+    }
+  }, [charIndex, fullText, onTypingComplete]);
 
   return (
-    <div className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-[8px] overflow-hidden shadow-[0_10px_40px_rgba(0,0,0,0.3)]">
-      {/* Header strip */}
-      <div className="bg-[#0d0d1a] p-[16px_20px] border-b border-[var(--border-subtle)]">
-        <div className="flex gap-4 items-center">
-          <div 
-            className="w-[36px] h-[36px] rounded-full flex items-center justify-center text-white font-bold text-sm shrink-0"
-            style={{ backgroundColor: getAvatarColor(data.senderName || "Unknown") }}
-          >
-            {initials}
-          </div>
-          <div className="flex flex-col">
-            <div className="font-sans font-semibold text-[var(--text-primary)] text-[0.9rem]">
-              {data.senderName}
-            </div>
-            <div className="font-mono text-[var(--text-code)] text-[0.75rem]">
-              &lt;{data.senderEmail}&gt;
-            </div>
-          </div>
+    <>
+      <div style={{
+        background: "rgba(34, 211, 170, 0.06)",
+        borderBottom: "1px solid rgba(34, 211, 170, 0.15)",
+        padding: "0.5rem 1rem",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "space-between",
+        gap: "0.5rem"
+      }}>
+        <div style={{ display: "flex", gap: "6px" }}>
+          <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#ff5f57", display: "inline-block" }} />
+          <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#febc2e", display: "inline-block" }} />
+          <span style={{ width: 10, height: 10, borderRadius: "50%", background: "#28c840", display: "inline-block" }} />
         </div>
-        <div className="font-sans font-semibold text-[var(--text-primary)] text-[1rem] mt-[8px]">
-          {data.subject}
+
+        <span style={{
+          fontFamily: "monospace",
+          fontSize: "0.7rem",
+          color: "rgba(34, 211, 170, 0.7)",
+          letterSpacing: "0.12em",
+          textTransform: "uppercase"
+        }}>
+          INTERCEPT // {sender}
+        </span>
+
+        <span style={{
+          width: 8, height: 8, borderRadius: "50%",
+          background: "#22d3aa",
+          display: "inline-block",
+          animation: "pulse 1.5s ease-in-out infinite"
+        }} />
+      </div>
+
+      <div style={{ padding: "1.25rem 1.25rem 1.5rem" }}>
+        <div style={{
+          fontFamily: "monospace",
+          fontSize: "0.95rem",
+          lineHeight: 1.7,
+          color: "#e2e8f0",
+          whiteSpace: "pre-wrap",
+          wordBreak: "break-word"
+        }}>
+          {displayedText}
+          <span style={{
+            display: "inline-block", width: "2px", height: "1em",
+            background: "#22d3aa", marginLeft: "2px",
+            animation: "blink 1s step-end infinite",
+            verticalAlign: "text-bottom"
+          }} />
         </div>
       </div>
       
-      {/* Body */}
-      <div className="p-[20px] font-sans font-normal text-[var(--text-primary)] text-[0.9rem] leading-[1.7]">
-        {paragraphs.map((p: string, i: number) => (
-          <p key={i} className="mb-4 last:mb-0">{p}</p>
-        ))}
-        
-        {data.linkText && data.linkUrl && (
-          <div className="mt-6">
-            <button 
-              onClick={() => setShowFullLink(!showFullLink)}
-              className="inline-block px-4 py-2 bg-[color-mix(in_srgb,var(--bg-surface)_100%,transparent)] border border-[var(--border-subtle)] text-[var(--text-code)] rounded-[16px] font-mono text-[0.8rem] transition-colors hover:border-[var(--accent-info)]"
-            >
-              🔗 {data.linkText}
-            </button>
-            {showFullLink && (
-              <div className="mt-3 p-3 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-[4px] font-mono text-[0.8rem] text-[var(--accent-info)] break-all shadow-inner">
-                {data.linkUrl}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function UrlCard({ challenge }: { challenge: Challenge }) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const data = challenge.data as Record<string, any>;
-  return (
-    <div className="mt-[40px] shadow-[0_10px_40px_rgba(0,0,0,0.3)]">
-      {data.context && (
-        <div className="font-sans italic text-[var(--text-muted)] text-[0.9rem] mb-[16px] text-center px-4">
-          {data.context}
-        </div>
-      )}
-      <div className="font-mono text-[var(--text-code)] text-[1.1rem] p-[20px] bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-[6px] break-all text-center">
-        {data.url}
-      </div>
-    </div>
-  );
-}
-
-function SmsCard({ challenge }: { challenge: Challenge }) {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const data = challenge.data as Record<string, any>;
-  return (
-    <div className="max-w-[320px] mx-auto bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-[16px] p-[20px] mt-[20px] shadow-[0_10px_40px_rgba(0,0,0,0.3)]">
-      <div className="font-mono text-[var(--text-muted)] text-[0.75rem] text-center mb-[12px]">
-        {data.from}
-      </div>
-      <div className="bg-[#1e1e32] rounded-[12px_12px_12px_2px] p-[12px_16px] font-sans text-[var(--text-primary)] text-[0.9rem] max-w-[85%] leading-[1.6]">
-        {data.body}
-      </div>
-    </div>
+      <div style={{
+        position: "absolute", inset: 0,
+        background: "repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(34,211,170,0.015) 2px, rgba(34,211,170,0.015) 4px)",
+        pointerEvents: "none",
+        borderRadius: "12px"
+      }} />
+    </>
   );
 }

@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "clean:dev": "Remove-Item -Recurse -Force .next 2>$null; npm run dev"
+    "lint": "next lint",
+    "fresh": "if exist .next rmdir /s /q .next && npm run dev"
   },
   "dependencies": {
     "clsx": "^2.1.1",

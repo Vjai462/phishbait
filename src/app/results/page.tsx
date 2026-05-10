@@ -7,6 +7,15 @@ import { submitScore, auth, googleProvider } from "@/lib/firebase";
 import { useAuth } from "@/context/AuthContext";
 import { signInWithPopup } from "firebase/auth";
 
+type AnswerRecord = {
+  subject: string;
+  isPhishing: boolean;
+  userAnswer: boolean;
+  correct: boolean;
+  redFlags: string[];
+  explanation: string;
+};
+
 export default function ResultsPage() {
   const router = useRouter();
   
@@ -17,6 +26,19 @@ export default function ResultsPage() {
   const resetGame = useGameStore((state) => state.resetGame);
   const { user } = useAuth();
   const [isSaved, setIsSaved] = useState(false);
+  const [debrief, setDebrief] = useState<AnswerRecord[]>([]);
+
+  useEffect(() => {
+    const raw = sessionStorage.getItem("phishbait_debrief");
+    if (raw) {
+      try {
+        setDebrief(JSON.parse(raw));
+      } catch (e) {
+        console.error("Failed to parse debrief", e);
+      }
+      sessionStorage.removeItem("phishbait_debrief");
+    }
+  }, []);
 
   const totalQuestions = answers.length;
   const correctCount = answers.filter((a) => a.correct).length;
@@ -65,41 +87,121 @@ export default function ResultsPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-[var(--bg-void)] p-4">
-      <div className="w-full max-w-[480px] bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-[12px] p-[32px] shadow-[0_10px_40px_rgba(0,0,0,0.4)]">
+    <div style={{
+      background: "linear-gradient(135deg, #0a0a0f 0%, #0f0f1a 100%)",
+      minHeight: "100vh",
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      padding: "4rem 1rem"
+    }}>
+      <div style={{
+        background: "rgba(255,255,255,0.04)",
+        border: "1px solid rgba(255,255,255,0.08)",
+        borderRadius: "24px",
+        padding: "2.5rem 2rem",
+        width: "100%",
+        maxWidth: "640px",
+        backdropFilter: "blur(20px)",
+        boxShadow: "0 24px 64px rgba(0,0,0,0.5)",
+        margin: "auto"
+      }}>
         
-        <h1 className="font-[Syne] font-bold text-[1.5rem] text-[var(--text-primary)]">
-          Mission Report
-        </h1>
-        
-        <div className="font-mono text-[var(--text-muted)] mb-[16px] text-[0.85rem]">
-          Agent {callsign || "Unknown"}
-        </div>
-        
-        <div className="mt-[8px] space-y-2">
-          <div className="text-[var(--accent-points)] text-[1.2rem] font-bold font-[Syne]">
-            Score: {score} pts
+        {/* TOP SECTION */}
+        <div style={{ textAlign: "center", marginBottom: "2rem" }}>
+          <div style={{
+            color: "#22c55e",
+            fontSize: "0.7rem",
+            letterSpacing: "0.15em",
+            marginBottom: "0.5rem",
+            fontFamily: "monospace",
+            fontWeight: 700
+          }}>
+            MISSION COMPLETE
           </div>
-          
-          <div className="text-[var(--text-primary)] font-sans font-medium">
-            Accuracy: {accuracy}%
-          </div>
-          
-          <div className="text-[var(--text-muted)] font-mono text-[0.85rem]">
-            {correctCount} / {totalQuestions} correct
+          <div style={{
+            color: "white",
+            fontSize: "0.95rem",
+            opacity: 0.6,
+            fontFamily: "monospace"
+          }}>
+            Agent {callsign || "Unknown"}
           </div>
         </div>
 
-        {!user && (
+        {/* SCORE */}
+        <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
+          <span style={{
+            fontSize: "clamp(3rem, 8vw, 5rem)",
+            fontWeight: 800,
+            background: "linear-gradient(135deg, #fbbf24, #f59e0b)",
+            WebkitBackgroundClip: "text",
+            WebkitTextFillColor: "transparent",
+            fontFamily: "'Syne', sans-serif"
+          }}>
+            {score}
+          </span>
+          <span style={{
+            color: "rgba(255,255,255,0.4)",
+            fontSize: "1.5rem",
+            marginLeft: "0.5rem",
+            fontWeight: 600
+          }}>
+            pts
+          </span>
+        </div>
+
+        {/* STATS ROW */}
+        <div style={{ display: "flex", gap: "1rem", margin: "1.5rem 0", justifyContent: "center" }}>
           <div style={{
-            marginTop: "1.5rem",
-            padding: "1rem 1.5rem",
             background: "rgba(255,255,255,0.05)",
+            border: "1px solid rgba(255,255,255,0.08)",
             borderRadius: "12px",
-            border: "1px solid rgba(255,255,255,0.1)",
+            padding: "0.75rem 1.25rem",
+            flex: 1,
             textAlign: "center"
           }}>
-            <p style={{ color: "#aaa", marginBottom: "0.75rem", fontSize: "0.9rem" }}>
+            <div style={{
+              fontSize: "0.7rem", color: "rgba(255,255,255,0.4)",
+              textTransform: "uppercase", letterSpacing: "0.1em",
+              marginBottom: "0.25rem", fontFamily: "monospace"
+            }}>
+              Accuracy
+            </div>
+            <div style={{ fontSize: "1.25rem", fontWeight: 700, color: "white" }}>
+              {accuracy}%
+            </div>
+          </div>
+          <div style={{
+            background: "rgba(255,255,255,0.05)",
+            border: "1px solid rgba(255,255,255,0.08)",
+            borderRadius: "12px",
+            padding: "0.75rem 1.25rem",
+            flex: 1,
+            textAlign: "center"
+          }}>
+            <div style={{
+              fontSize: "0.7rem", color: "rgba(255,255,255,0.4)",
+              textTransform: "uppercase", letterSpacing: "0.1em",
+              marginBottom: "0.25rem", fontFamily: "monospace"
+            }}>
+              Correct
+            </div>
+            <div style={{ fontSize: "1.25rem", fontWeight: 700, color: "white" }}>
+              {correctCount} / {totalQuestions}
+            </div>
+          </div>
+        </div>
+
+        {/* SIGN IN BANNER */}
+        {!user && (
+          <div style={{
+            background: "rgba(239,68,68,0.08)",
+            border: "1px solid rgba(239,68,68,0.2)",
+            borderRadius: "12px", padding: "1rem 1.25rem",
+            marginTop: "1.5rem", textAlign: "center"
+          }}>
+            <p style={{ fontSize: "0.85rem", color: "rgba(255,255,255,0.6)", marginBottom: "0.75rem" }}>
               Want to save your score and track your progress?
             </p>
             <button
@@ -107,41 +209,126 @@ export default function ResultsPage() {
                 await signInWithPopup(auth, googleProvider);
               }}
               style={{
-                background: "#ef4444",
-                color: "white",
-                padding: "0.6rem 1.5rem",
-                borderRadius: "999px",
-                fontWeight: 700,
-                border: "none",
-                cursor: "pointer",
-                fontSize: "0.9rem"
+                background: "#ef4444", color: "white", padding: "0.6rem 1.5rem",
+                borderRadius: "999px", fontWeight: 700, border: "none", cursor: "pointer", fontSize: "0.9rem"
               }}>
               Sign in with Google to Save Score
             </button>
           </div>
         )}
 
+        {/* SAVED BADGE */}
         {user && isSaved && (
-          <div className="mt-4 text-center text-[#16a34a] font-mono text-sm">
-            Saved to leaderboard ✓
+          <div style={{ textAlign: "center", marginTop: "1rem" }}>
+            <span style={{
+              background: "rgba(34,197,94,0.1)", border: "1px solid rgba(34,197,94,0.25)",
+              color: "#86efac", fontSize: "0.8rem", padding: "0.4rem 1rem", borderRadius: "999px",
+              display: "inline-block"
+            }}>
+              ✓ Score saved to leaderboard
+            </span>
           </div>
         )}
 
-        <div className="mt-[32px] flex gap-3">
+        {/* ACTION BUTTONS ROW */}
+        <div style={{ display: "flex", gap: "0.75rem", marginTop: "1.5rem" }}>
           <button 
             onClick={handlePlayAgain}
-            className="flex-1 bg-[var(--accent-danger)] text-white py-[12px] px-[16px] rounded-full font-[Syne] font-bold transition-all hover:brightness-110"
+            style={{
+              background: "#ef4444", color: "white", fontWeight: 700,
+              padding: "0.75rem 2rem", borderRadius: "999px", flex: 1,
+              border: "none", cursor: "pointer", fontFamily: "'Syne', sans-serif"
+            }}
           >
             Play Again
           </button>
           
           <button 
             onClick={handleBackToHome}
-            className="flex-1 bg-transparent border border-[var(--border-subtle)] text-[var(--text-muted)] py-[12px] px-[16px] rounded-full font-[Syne] font-bold transition-all hover:bg-[var(--bg-surface)] hover:text-[var(--text-primary)]"
+            style={{
+              background: "transparent", border: "1px solid rgba(255,255,255,0.15)",
+              color: "rgba(255,255,255,0.6)", padding: "0.75rem 2rem", borderRadius: "999px", flex: 1,
+              cursor: "pointer", fontWeight: 600, fontFamily: "'Syne', sans-serif"
+            }}
           >
             Back to Home
           </button>
         </div>
+
+        {/* MISSION DEBRIEF */}
+        <div style={{ borderTop: "1px solid rgba(255,255,255,0.07)", margin: "2.5rem 0 1.5rem 0" }} />
+        
+        <h2 style={{
+          color: "white", fontSize: "0.75rem", fontWeight: 700,
+          letterSpacing: "0.12em", marginBottom: "1rem",
+          textTransform: "uppercase"
+        }}>
+          📋 MISSION DEBRIEF
+        </h2>
+
+        {debrief.map((item, i) => (
+          <div key={i} style={{
+            background: item.correct
+              ? "rgba(34, 197, 94, 0.06)"
+              : "rgba(239, 68, 68, 0.06)",
+            border: `1px solid ${item.correct
+              ? "rgba(34, 197, 94, 0.2)"
+              : "rgba(239, 68, 68, 0.2)"}`,
+            borderRadius: "12px",
+            padding: "1rem 1.25rem",
+            marginBottom: "0.75rem",
+          }}>
+            {/* Header row */}
+            <div style={{ display: "flex", alignItems: "flex-start", gap: "0.6rem", marginBottom: "0.5rem" }}>
+              <span style={{ fontSize: "1rem" }}>{item.correct ? "✅" : "❌"}</span>
+              <p style={{
+                color: "white", fontWeight: 600, fontSize: "0.9rem",
+                lineHeight: 1.4, margin: 0
+              }}>
+                {item.subject}
+              </p>
+            </div>
+
+            {/* Answer vs correct */}
+            <p style={{ fontSize: "0.78rem", color: "rgba(255,255,255,0.5)", marginBottom: "0.5rem" }}>
+              Your answer:{" "}
+              <span style={{ color: item.userAnswer ? "#f87171" : "#86efac" }}>
+                {item.userAnswer ? "PHISHING" : "LEGIT"}
+              </span>
+              {"  •  "}Correct:{" "}
+              <span style={{ color: item.isPhishing ? "#f87171" : "#86efac" }}>
+                {item.isPhishing ? "PHISHING" : "LEGIT"}
+              </span>
+            </p>
+
+            {/* Explanation */}
+            <p style={{ fontSize: "0.82rem", color: "rgba(255,255,255,0.65)", marginBottom: item.redFlags?.length ? "0.5rem" : 0 }}>
+              {item.explanation}
+            </p>
+
+            {/* Red flags — only for phishing */}
+            {item.redFlags?.length > 0 && (
+              <ul style={{ paddingLeft: "1.1rem", margin: 0 }}>
+                {item.redFlags.map((flag, j) => (
+                  <li key={j} style={{
+                    fontSize: "0.78rem",
+                    color: "rgba(255,255,255,0.5)",
+                    marginBottom: "0.2rem"
+                  }}>
+                    {flag}
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        ))}
+
+        {debrief.length === 0 && (
+          <p style={{ color: "rgba(255,255,255,0.3)", fontSize: "0.85rem", textAlign: "center" }}>
+            No debrief data available. Play a game first.
+          </p>
+        )}
+
       </div>
     </div>
   );

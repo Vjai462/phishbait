@@ -157,29 +157,97 @@ export default function LandingPage() {
               <p className="text-[15px] md:text-[16px] text-[#94a3b8] max-w-[480px] mt-3" style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 400 }}>
                 10 challenges. 60 seconds each. Train your instincts against real-world phishing attacks before they train you.
               </p>
-              <div className="flex flex-wrap items-center gap-4 mt-8">
-                <motion.button
-                  whileHover={{ scale: 1.04, backgroundColor: "rgba(255,255,255,0.05)" }}
-                  onClick={handleGuestPlay}
-                  className="bg-transparent border border-white/20 text-white font-bold rounded-full px-8 py-3 text-[15px] transition-colors"
-                >
-                  Play as Guest
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.04, boxShadow: "0 0 30px rgba(255,59,59,0.4)" }}
-                  onClick={user ? () => router.push("/play") : handleGoogleSignIn}
-                  className="bg-[#ff3b3b] text-white font-bold rounded-full px-8 py-3 text-[15px] transition-colors"
-                >
-                  {user ? `Continue as ${user.displayName?.split(" ")[0]}` : "Sign in with Google"}
-                </motion.button>
-              </div>
-              {user && (
-                <button 
-                  onClick={() => signOut(auth)} 
-                  className="text-xs text-[#64748b] hover:text-white mt-4 underline underline-offset-2 transition-colors"
-                >
-                  Sign out
-                </button>
+              {user ? (
+                <div style={{
+                  display: "flex", flexDirection: "column", gap: "0.75rem",
+                  alignItems: "flex-start", marginTop: "2rem"
+                }}>
+                  {/* User info row */}
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                    <div style={{
+                      width: 36, height: 36, borderRadius: "50%",
+                      background: "rgba(239,68,68,0.2)",
+                      border: "1px solid rgba(239,68,68,0.4)",
+                      display: "flex", alignItems: "center", justifyContent: "center",
+                      color: "#ef4444", fontWeight: 700, fontSize: "0.9rem"
+                    }}>
+                      {user.displayName?.[0]?.toUpperCase()}
+                    </div>
+                    <div>
+                      <p style={{ color: "white", fontWeight: 600, fontSize: "0.9rem", margin: 0 }}>
+                        Welcome back, {user.displayName?.split(" ")[0]}
+                      </p>
+                      <button
+                        onClick={() => signOut(auth)}
+                        style={{
+                          background: "none", border: "none", padding: 0,
+                          color: "rgba(255,255,255,0.35)", fontSize: "0.75rem",
+                          cursor: "pointer", textDecoration: "underline",
+                          textUnderlineOffset: "2px"
+                        }}
+                      >
+                        Sign out
+                      </button>
+                    </div>
+                  </div>
+
+                  {/* Play button */}
+                  <motion.button
+                    whileHover={{ scale: 1.04, boxShadow: "0 0 30px rgba(255,59,59,0.4)" }}
+                    onClick={() => router.push("/play")}
+                    style={{
+                      background: "#ef4444", color: "white",
+                      fontWeight: 700, fontSize: "0.95rem",
+                      padding: "0.75rem 2rem", borderRadius: "999px",
+                      border: "none", cursor: "pointer",
+                      marginTop: "0.5rem"
+                    }}
+                  >
+                    ▶ Continue Training
+                  </motion.button>
+                </div>
+              ) : (
+                <>
+                  <div className="flex flex-wrap items-center gap-4 mt-8">
+                    <motion.button
+                      whileHover={{ scale: 1.04, backgroundColor: "rgba(255,255,255,0.05)" }}
+                      onClick={handleGuestPlay}
+                      className="bg-transparent border border-white/20 text-white font-bold rounded-full px-8 py-3 text-[15px] transition-colors"
+                    >
+                      Play as Guest
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.04, boxShadow: "0 0 30px rgba(255,59,59,0.4)" }}
+                      onClick={handleGoogleSignIn}
+                      className="bg-[#ff3b3b] text-white font-bold rounded-full px-8 py-3 text-[15px] transition-colors"
+                    >
+                      Sign in with Google
+                    </motion.button>
+                  </div>
+                  <p style={{
+                    marginTop: "1.25rem",
+                    fontSize: "0.85rem",
+                    color: "rgba(255,255,255,0.35)"
+                  }}>
+                    Already have an account?{" "}
+                    <button
+                      onClick={handleGoogleSignIn}
+                      style={{
+                        background: "none",
+                        border: "none",
+                        color: "rgba(255,255,255,0.65)",
+                        fontSize: "0.85rem",
+                        fontWeight: 600,
+                        cursor: "pointer",
+                        textDecoration: "underline",
+                        textUnderlineOffset: "3px",
+                        padding: 0
+                      }}
+                    >
+                      Log in here →
+                    </button>
+                  </p>
+                </>
               )}
             </motion.div>
           </div>
@@ -231,20 +299,37 @@ export default function LandingPage() {
             
             <div style={{ width: "1px", height: "20px", background: "rgba(255,255,255,0.15)", margin: "0 0.25rem" }} />
 
-            <button 
-              onClick={user ? () => router.push("/play") : handleGoogleSignIn}
-              className="bg-[#ef4444] hover:bg-[#dc2626] text-white transition-colors shrink-0"
-              style={{
-                fontWeight: 700,
-                fontSize: "0.875rem",
-                padding: "0.5rem 1.25rem",
-                borderRadius: "999px",
-                border: "none",
-                boxShadow: "none"
-              }}
-            >
-              {user ? "Play" : "Sign In & Play"} →
-            </button>
+            {user ? (
+              <button
+                onClick={() => router.push("/play")}
+                className="bg-[#ef4444] hover:bg-[#dc2626] text-white transition-colors shrink-0"
+                style={{
+                  fontWeight: 700,
+                  fontSize: "0.875rem",
+                  padding: "0.5rem 1.25rem",
+                  borderRadius: "999px",
+                  border: "none",
+                  boxShadow: "none"
+                }}
+              >
+                ▶ Play Now
+              </button>
+            ) : (
+              <button
+                onClick={handleGoogleSignIn}
+                className="bg-[#ef4444] hover:bg-[#dc2626] text-white transition-colors shrink-0"
+                style={{
+                  fontWeight: 700,
+                  fontSize: "0.875rem",
+                  padding: "0.5rem 1.25rem",
+                  borderRadius: "999px",
+                  border: "none",
+                  boxShadow: "none"
+                }}
+              >
+                Sign in & Play →
+              </button>
+            )}
           </motion.nav>
 
         </div>
@@ -325,22 +410,34 @@ export default function LandingPage() {
         <p className="text-[15px] text-[#64748b] mt-2" style={{ fontFamily: "'DM Sans', sans-serif", fontWeight: 400 }}>
           It takes 60 seconds. No signup.
         </p>
-        <div className="flex flex-wrap items-center justify-center gap-4 mt-8">
-          <motion.button
-            whileHover={{ scale: 1.04, backgroundColor: "rgba(255,255,255,0.05)" }}
-            onClick={handleGuestPlay}
-            className="bg-transparent border border-white/20 text-white font-bold rounded-full px-10 py-4 text-[15px] transition-colors"
-          >
-            Play as Guest
-          </motion.button>
-          <motion.button
-            whileHover={{ scale: 1.04, boxShadow: "0 0 30px rgba(255,59,59,0.4)" }}
-            onClick={user ? () => router.push("/play") : handleGoogleSignIn}
-            className="bg-[#ff3b3b] text-white font-bold rounded-full px-10 py-4 text-[15px] transition-colors"
-          >
-            {user ? `Continue as ${user.displayName?.split(" ")[0]}` : "Sign in with Google"}
-          </motion.button>
-        </div>
+        {user ? (
+          <div className="flex justify-center mt-8">
+            <motion.button
+              whileHover={{ scale: 1.04, boxShadow: "0 0 30px rgba(255,59,59,0.4)" }}
+              onClick={() => router.push("/play")}
+              className="bg-[#ff3b3b] text-white font-bold rounded-full px-10 py-4 text-[15px] transition-colors"
+            >
+              ▶ Continue Training
+            </motion.button>
+          </div>
+        ) : (
+          <div className="flex flex-wrap items-center justify-center gap-4 mt-8">
+            <motion.button
+              whileHover={{ scale: 1.04, backgroundColor: "rgba(255,255,255,0.05)" }}
+              onClick={handleGuestPlay}
+              className="bg-transparent border border-white/20 text-white font-bold rounded-full px-10 py-4 text-[15px] transition-colors"
+            >
+              Play as Guest
+            </motion.button>
+            <motion.button
+              whileHover={{ scale: 1.04, boxShadow: "0 0 30px rgba(255,59,59,0.4)" }}
+              onClick={handleGoogleSignIn}
+              className="bg-[#ff3b3b] text-white font-bold rounded-full px-10 py-4 text-[15px] transition-colors"
+            >
+              Sign in with Google
+            </motion.button>
+          </div>
+        )}
       </section>
 
     </div>
