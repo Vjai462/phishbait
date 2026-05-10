@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useGameStore } from "@/lib/store";
+import { submitScore } from "@/lib/firebase";
 
 export default function ResultsPage() {
   const router = useRouter();
@@ -10,7 +11,14 @@ export default function ResultsPage() {
   const score = useGameStore((state) => state.score);
   const answers = useGameStore((state) => state.answers);
   const callsign = useGameStore((state) => state.callsign);
+  const difficulty = useGameStore((state) => state.difficulty);
   const resetGame = useGameStore((state) => state.resetGame);
+
+  const [hasSubmitted, setHasSubmitted] = useState(false);
+
+  const totalQuestions = answers.length;
+  const correctCount = answers.filter((a) => a.correct).length;
+  const accuracy = totalQuestions > 0 ? Math.round((correctCount / totalQuestions) * 100) : 0;
 
   useEffect(() => {
     if (answers.length === 0) {
@@ -18,13 +26,26 @@ export default function ResultsPage() {
     }
   }, [answers.length, router]);
 
+  useEffect(() => {
+    if (!answers.length || hasSubmitted) return;
+
+    const diff = difficulty || "easy";
+    const agentCallsign = callsign || "Unknown";
+
+    submitScore({
+      callsign: agentCallsign,
+      score,
+      accuracy,
+      difficulty: diff,
+      createdAt: Date.now()
+    }).catch(() => {}).finally(() => {
+      setHasSubmitted(true);
+    });
+  }, [answers.length, hasSubmitted, score, accuracy, difficulty, callsign]);
+
   if (answers.length === 0) {
     return null; // Prevents NaN flashing while redirecting
   }
-
-  const totalQuestions = answers.length;
-  const correctCount = answers.filter((a) => a.correct).length;
-  const accuracy = Math.round((correctCount / totalQuestions) * 100);
 
   const handlePlayAgain = () => {
     resetGame();

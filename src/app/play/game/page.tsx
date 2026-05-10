@@ -116,13 +116,21 @@ export default function GamePage() {
   return (
     <div className="min-h-screen bg-[#0A0A14] relative pb-[100px] overflow-x-hidden">
       {/* BACKGROUND */}
-      <video
-        src="https://d8j0ntlcm91z4.cloudfront.net/user_38xzZboKViGWJOttwIXH07lWA1P/hf_20260328_091828_e240eb17-6edc-4129-ad9d-98678e3fd238.mp4"
-        autoPlay
-        muted
-        loop
-        playsInline
-        className="absolute inset-0 w-full h-full object-cover opacity-10 pointer-events-none"
+      <img
+        src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=1920&q=90"
+        alt=""
+        style={{
+          position: "absolute",
+          inset: 0,
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          objectPosition: "center",
+          opacity: 0.35,
+          filter: "contrast(1.1) saturate(0.8) hue-rotate(10deg)",
+          pointerEvents: "none",
+          zIndex: 0
+        }}
       />
       <div className="absolute inset-0 bg-gradient-to-b from-[#0A0A14]/80 via-transparent to-[#0A0A14] z-0 pointer-events-none" />
 
