@@ -94,7 +94,12 @@ export default function ResultsPage() {
     router.push("/");
   };
 
-  const shareUrl = `https://phishbait-hazel.vercel.app/share?score=${score}&accuracy=${accuracy}&name=${encodeURIComponent(user?.displayName?.split(" ")[0] || "Someone")}`;
+  const payload = btoa(JSON.stringify({
+    s: score,
+    a: accuracy,
+    n: user?.displayName?.split(" ")[0] || "Agent"
+  }));
+  const shareUrl = `https://phishbait-hazel.vercel.app/share?d=${payload}`;
   const shareText = `🎣 I scored ${score} pts on PhishBait with ${accuracy}% accuracy!\nCan you spot the phish? Try it: ${shareUrl}`;
 
   const shareOnTwitter = () => {

@@ -26,6 +26,24 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const shareEntry = (entry: HistoryEntry) => {
+    const payload = btoa(JSON.stringify({
+      s: entry.score,
+      a: entry.accuracy,
+      n: user?.displayName?.split(" ")[0] || "Agent"
+    }));
+    const shareUrl = `https://phishbait-hazel.vercel.app/share?d=${payload}`;
+    const text = `🎣 I scored ${entry.score} pts on PhishBait with ${entry.accuracy}% accuracy!\nCan you beat me? ${shareUrl}`;
+    
+    // Use Web Share API on mobile, fallback to clipboard
+    if (navigator.share) {
+      navigator.share({ text });
+    } else {
+      navigator.clipboard.writeText(text);
+      alert("Result link copied!");
+    }
+  };
+
   useEffect(() => {
     if (!user) {
       router.push("/");
@@ -112,10 +130,10 @@ export default function ProfilePage() {
                   border: "1px solid rgba(255,255,255,0.08)",
                   borderRadius: "12px", padding: "1rem 0.75rem", textAlign: "center"
                 }}>
-                  <p style={{ margin: 0, fontSize: "0.6rem", color: "rgba(255,255,255,0.35)", letterSpacing: "0.1em", marginBottom: "0.4rem" }}>
+                  <p style={{ fontFamily: "monospace", fontSize: "0.6rem", letterSpacing: "0.1em", color: "rgba(255,255,255,0.35)", marginBottom: "0.4rem", margin: 0 }}>
                     {stat.label}
                   </p>
-                  <p style={{ margin: 0, fontSize: "1.5rem", fontWeight: 800, color: stat.color }}>
+                  <p style={{ fontFamily: "monospace", fontSize: "1.5rem", fontWeight: 800, color: stat.color, margin: 0 }}>
                     {stat.value}
                   </p>
                 </div>
@@ -148,13 +166,33 @@ export default function ProfilePage() {
                         {entry.correct}/{entry.total} correct
                       </p>
                     </div>
-                    <div style={{ textAlign: "right" }}>
+                    <div style={{ 
+                      display: "flex", flexDirection: "column", 
+                      alignItems: "flex-end", gap: "0.25rem" 
+                    }}>
                       <p style={{ margin: 0, fontSize: "1.1rem", fontWeight: 700, color: "#fbbf24" }}>
                         {entry.score.toLocaleString()}
                       </p>
                       <p style={{ margin: 0, fontSize: "0.75rem", color: "#22d3aa" }}>
                         {entry.accuracy}%
                       </p>
+                      <button
+                        onClick={() => shareEntry(entry)}
+                        style={{
+                          background: "rgba(255,255,255,0.05)",
+                          border: "1px solid rgba(255,255,255,0.1)",
+                          borderRadius: "999px",
+                          color: "rgba(255,255,255,0.45)",
+                          fontSize: "0.65rem",
+                          padding: "0.2rem 0.6rem",
+                          cursor: "pointer",
+                          fontFamily: "monospace",
+                          letterSpacing: "0.05em",
+                          marginTop: "0.1rem"
+                        }}
+                      >
+                        ↗ SHARE
+                      </button>
                     </div>
                   </div>
                 ))}

@@ -5,9 +5,18 @@ import { Suspense } from "react";
 
 function ShareContent() {
   const params = useSearchParams();
-  const score = params.get("score") || "0";
-  const accuracy = params.get("accuracy") || "0";
-  const name = params.get("name") || "An Agent";
+  let score = "0", accuracy = "0", name = "An Agent";
+  try {
+    const d = params.get("d");
+    if (d) {
+      const decoded = JSON.parse(atob(d));
+      score = String(decoded.s || 0);
+      accuracy = String(decoded.a || 0);
+      name = decoded.n || "An Agent";
+    }
+  } catch {
+    // fallback to defaults
+  }
 
   return (
     <main style={{

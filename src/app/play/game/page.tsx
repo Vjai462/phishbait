@@ -369,12 +369,25 @@ export default function GamePage() {
                 </div>
               </div>
 
-              <button
-                onClick={handleNextChallenge}
-                className={`w-full font-display font-bold text-white rounded-full py-3 transition ${lastCorrect ? "bg-[#16a34a] hover:bg-[#15803d]" : "bg-[#ff3b3b] hover:bg-[#e13232]"}`}
-              >
-                {lastCorrect ? "NEXT THREAT →" : "UNDERSTOOD — NEXT THREAT →"}
-              </button>
+              <div style={{ width: "100%", boxSizing: "border-box", padding: "0 0" }}>
+                <button
+                  onClick={handleNextChallenge}
+                  className={`w-full font-display font-bold text-white rounded-full transition ${lastCorrect ? "bg-[#16a34a] hover:bg-[#15803d]" : "bg-[#ff3b3b] hover:bg-[#e13232]"}`}
+                  style={{
+                    whiteSpace: "nowrap",
+                    overflow: "hidden",
+                    textOverflow: "ellipsis",
+                    width: "100%",
+                    maxWidth: "100%",
+                    boxSizing: "border-box",
+                    fontSize: "clamp(0.75rem, 3.5vw, 0.95rem)",
+                    padding: "0.85rem 1rem",
+                    textAlign: "center"
+                  }}
+                >
+                  NEXT THREAT →
+                </button>
+              </div>
             </div>
           </div>
         )}
