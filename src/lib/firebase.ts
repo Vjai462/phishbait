@@ -1,5 +1,5 @@
 import { initializeApp, getApps } from "firebase/app";
-import { getDatabase } from "firebase/database";
+import { getDatabase, ref, push, get } from "firebase/database";
 import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
 const firebaseConfig = {
@@ -63,4 +63,45 @@ export async function getLeaderboard(): Promise<Array<{
     entries.push({ id: child.key as string, ...val });
   });
   return entries.reverse();
+}
+
+export async function saveGameHistory(
+  userId: string,
+  entry: {
+    score: number;
+    accuracy: number;
+    correct: number;
+    total: number;
+    playedAt: number;
+  }
+) {
+  const historyRef = ref(db, `users/${userId}/history`);
+  await push(historyRef, entry);
+}
+
+export async function getUserProfile(userId: string) {
+  const historyRef = ref(db, `users/${userId}/history`);
+  const snap = await get(historyRef);
+  if (!snap.exists()) return null;
+
+  const entries = Object.values(snap.val()) as Array<{
+    score: number;
+    accuracy: number;
+    correct: number;
+    total: number;
+    playedAt: number;
+  }>;
+
+  const bestScore = Math.max(...entries.map(e => e.score));
+  const avgAccuracy = Math.round(
+    entries.reduce((sum, e) => sum + e.accuracy, 0) / entries.length
+  );
+  const gamesPlayed = entries.length;
+
+  return {
+    bestScore,
+    avgAccuracy,
+    gamesPlayed,
+    history: entries.sort((a, b) => b.playedAt - a.playedAt)
+  };
 }

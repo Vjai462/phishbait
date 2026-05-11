@@ -241,15 +241,18 @@ export default function GamePage() {
               ⚡ Sign In
             </button>
           ) : (
-            <span style={{
-              fontFamily: "monospace",
-              fontSize: "0.7rem",
-              color: "rgba(34, 211, 170, 0.6)",
-              letterSpacing: "0.08em",
-              marginLeft: "1rem"
-            }}>
-              {user.displayName?.split(" ")[0]?.toUpperCase()}
-            </span>
+            <button
+              onClick={() => router.push("/profile")}
+              style={{
+                background: "none", border: "none",
+                fontFamily: "monospace", fontSize: "0.7rem",
+                color: "rgba(34,211,170,0.7)", cursor: "pointer",
+                letterSpacing: "0.08em", padding: 0, marginLeft: "1rem",
+                textDecoration: "underline", textUnderlineOffset: "3px"
+              }}
+            >
+              {user.displayName?.split(" ")[0]?.toUpperCase()} ↗
+            </button>
           )}
 
           <button

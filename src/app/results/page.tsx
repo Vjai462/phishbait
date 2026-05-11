@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useGameStore } from "@/lib/store";
-import { submitScore, auth, googleProvider } from "@/lib/firebase";
+import { submitScore, auth, googleProvider, saveGameHistory } from "@/lib/firebase";
 import { useAuth } from "@/context/AuthContext";
 import { signInWithPopup } from "firebase/auth";
 
@@ -27,6 +27,7 @@ export default function ResultsPage() {
   const { user } = useAuth();
   const [isSaved, setIsSaved] = useState(false);
   const [debrief, setDebrief] = useState<AnswerRecord[]>([]);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const raw = sessionStorage.getItem("phishbait_debrief");
@@ -67,10 +68,17 @@ export default function ResultsPage() {
       accuracy,
       difficulty: diff,
       createdAt: Date.now()
-    }).then(() => {
+    }).then(async () => {
       setIsSaved(true);
+      await saveGameHistory(user.uid, {
+        score: score,
+        accuracy: accuracy,
+        correct: correctCount,
+        total: totalQuestions,
+        playedAt: Date.now()
+      });
     }).catch(() => {});
-  }, [answers.length, score, accuracy, difficulty, callsign, user]);
+  }, [answers.length, score, accuracy, difficulty, callsign, user, correctCount, totalQuestions]);
 
   if (answers.length === 0) {
     return null; // Prevents NaN flashing while redirecting
@@ -84,6 +92,25 @@ export default function ResultsPage() {
 
   const handleBackToHome = () => {
     router.push("/");
+  };
+
+  const shareUrl = `https://phishbait-hazel.vercel.app/share?score=${score}&accuracy=${accuracy}&name=${encodeURIComponent(user?.displayName?.split(" ")[0] || "Someone")}`;
+  const shareText = `🎣 I scored ${score} pts on PhishBait with ${accuracy}% accuracy!\nCan you spot the phish? Try it: ${shareUrl}`;
+
+  const shareOnTwitter = () => {
+    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`;
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
+  const shareOnWhatsApp = () => {
+    const url = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+    window.open(url, "_blank", "noopener,noreferrer");
+  };
+
+  const copyToClipboard = async () => {
+    await navigator.clipboard.writeText(shareText);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
   };
 
   return (
@@ -253,6 +280,117 @@ export default function ResultsPage() {
           >
             Back to Home
           </button>
+        </div>
+
+        {/* SHARE SECTION */}
+        <div style={{
+          marginTop: "1.5rem",
+          padding: "1.25rem",
+          background: "rgba(255,255,255,0.03)",
+          border: "1px solid rgba(255,255,255,0.08)",
+          borderRadius: "14px",
+          textAlign: "center"
+        }}>
+
+          {/* Label */}
+          <p style={{
+            margin: "0 0 0.25rem 0",
+            fontSize: "0.7rem",
+            color: "rgba(34,211,170,0.7)",
+            letterSpacing: "0.15em",
+            fontFamily: "monospace"
+          }}>
+            TRANSMIT RESULTS
+          </p>
+          <p style={{
+            margin: "0 0 1rem 0",
+            fontSize: "0.82rem",
+            color: "rgba(255,255,255,0.4)"
+          }}>
+            Challenge your network — can they spot the phish?
+          </p>
+
+          {/* Share buttons row */}
+          <div style={{
+            display: "flex",
+            gap: "0.6rem",
+            justifyContent: "center",
+            flexWrap: "wrap"
+          }}>
+
+            {/* Twitter / X */}
+            <button
+              onClick={shareOnTwitter}
+              style={{
+                display: "flex", alignItems: "center", gap: "0.4rem",
+                background: "#000000",
+                border: "1px solid rgba(255,255,255,0.15)",
+                color: "white",
+                fontSize: "0.82rem", fontWeight: 600,
+                padding: "0.55rem 1.1rem",
+                borderRadius: "999px",
+                cursor: "pointer"
+              }}
+            >
+              {/* X logo */}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="white">
+                <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.746l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+              </svg>
+              Share on X
+            </button>
+
+            {/* WhatsApp */}
+            <button
+              onClick={shareOnWhatsApp}
+              style={{
+                display: "flex", alignItems: "center", gap: "0.4rem",
+                background: "#25D366",
+                border: "none",
+                color: "white",
+                fontSize: "0.82rem", fontWeight: 600,
+                padding: "0.55rem 1.1rem",
+                borderRadius: "999px",
+                cursor: "pointer"
+              }}
+            >
+              {/* WhatsApp icon */}
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="white">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+              </svg>
+              WhatsApp
+            </button>
+
+            {/* Copy link */}
+            <button
+              onClick={copyToClipboard}
+              style={{
+                display: "flex", alignItems: "center", gap: "0.4rem",
+                background: copied ? "rgba(34,197,94,0.15)" : "rgba(255,255,255,0.06)",
+                border: `1px solid ${copied ? "rgba(34,197,94,0.3)" : "rgba(255,255,255,0.12)"}`,
+                color: copied ? "#86efac" : "rgba(255,255,255,0.7)",
+                fontSize: "0.82rem", fontWeight: 600,
+                padding: "0.55rem 1.1rem",
+                borderRadius: "999px",
+                cursor: "pointer",
+                transition: "all 200ms ease"
+              }}
+            >
+              {copied ? "✓ Copied!" : "⎘ Copy link"}
+            </button>
+
+          </div>
+
+          {/* Preview of share text */}
+          <p style={{
+            marginTop: "0.85rem",
+            fontSize: "0.75rem",
+            color: "rgba(255,255,255,0.2)",
+            fontStyle: "italic",
+            lineHeight: 1.5
+          }}>
+            &ldquo;{shareText.split('\n')[0]}&rdquo;
+          </p>
+
         </div>
 
         {/* MISSION DEBRIEF */}

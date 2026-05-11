@@ -114,7 +114,7 @@ export default function LandingPage() {
       
       {/* SECTION 1: HERO */}
       <section className="px-4">
-        <div className="relative w-full max-w-[1400px] mx-auto rounded-[48px] bg-[#0d0d1a] border border-slate-800/50 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.4)] overflow-hidden h-[600px] flex flex-col">
+        <div className="relative w-full max-w-[1400px] mx-auto rounded-[48px] bg-[#0d0d1a] border border-slate-800/50 shadow-[0_40px_100px_-20px_rgba(0,0,0,0.4)] overflow-hidden min-h-[600px] flex flex-col">
           
           {/* Background Video */}
           <div className="absolute inset-0 z-0">
@@ -177,17 +177,30 @@ export default function LandingPage() {
                       <p style={{ color: "white", fontWeight: 600, fontSize: "0.9rem", margin: 0 }}>
                         Welcome back, {user.displayName?.split(" ")[0]}
                       </p>
-                      <button
-                        onClick={() => signOut(auth)}
-                        style={{
-                          background: "none", border: "none", padding: 0,
-                          color: "rgba(255,255,255,0.35)", fontSize: "0.75rem",
-                          cursor: "pointer", textDecoration: "underline",
-                          textUnderlineOffset: "2px"
-                        }}
-                      >
-                        Sign out
-                      </button>
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", marginTop: "0.2rem" }}>
+                        <button
+                          onClick={() => router.push("/profile")}
+                          style={{
+                            background: "none", border: "none", padding: 0,
+                            color: "#22d3aa", fontSize: "0.75rem", fontWeight: 600,
+                            cursor: "pointer", textDecoration: "underline",
+                            textUnderlineOffset: "2px"
+                          }}
+                        >
+                          My Profile →
+                        </button>
+                        <button
+                          onClick={() => signOut(auth)}
+                          style={{
+                            background: "none", border: "none", padding: 0,
+                            color: "rgba(255,255,255,0.35)", fontSize: "0.75rem",
+                            cursor: "pointer", textDecoration: "underline",
+                            textUnderlineOffset: "2px"
+                          }}
+                        >
+                          Sign out
+                        </button>
+                      </div>
                     </div>
                   </div>
 
@@ -208,24 +221,35 @@ export default function LandingPage() {
                 </div>
               ) : (
                 <>
-                  <div className="flex flex-wrap items-center gap-4 mt-8">
+                  <div style={{
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: "0.75rem",
+                    alignItems: "flex-start",
+                    width: "100%",
+                    maxWidth: "320px",
+                    marginTop: "2rem"
+                  }}>
                     <motion.button
                       whileHover={{ scale: 1.04, backgroundColor: "rgba(255,255,255,0.05)" }}
                       onClick={handleGuestPlay}
-                      className="bg-transparent border border-white/20 text-white font-bold rounded-full px-8 py-3 text-[15px] transition-colors"
+                      style={{ width: "100%", padding: "0.85rem 1.5rem" }}
+                      className="bg-transparent border border-white/20 text-white font-bold rounded-full text-[15px] transition-colors"
                     >
                       Play as Guest
                     </motion.button>
                     <motion.button
                       whileHover={{ scale: 1.04, boxShadow: "0 0 30px rgba(255,59,59,0.4)" }}
                       onClick={handleGoogleSignIn}
-                      className="bg-[#ff3b3b] text-white font-bold rounded-full px-8 py-3 text-[15px] transition-colors"
+                      style={{ width: "100%", padding: "0.85rem 1.5rem" }}
+                      className="bg-[#ff3b3b] text-white font-bold rounded-full text-[15px] transition-colors"
                     >
                       Sign in with Google
                     </motion.button>
                   </div>
                   <p style={{
                     marginTop: "1.25rem",
+                    marginBottom: "5rem",
                     fontSize: "0.85rem",
                     color: "rgba(255,255,255,0.35)"
                   }}>
@@ -253,21 +277,24 @@ export default function LandingPage() {
           </div>
 
           {/* FLOATING BOTTOM NAVBAR */}
-          <motion.nav
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4, duration: 0.6 }}
-            className="absolute bottom-10 left-1/2 -translate-x-1/2 z-30 flex items-center"
-            style={{
-              background: "rgba(15, 15, 15, 0.75)",
-              backdropFilter: "blur(16px)",
-              border: "1px solid rgba(255, 255, 255, 0.1)",
-              borderRadius: "999px",
-              padding: "0.5rem 0.75rem",
-              gap: "0.25rem",
-              boxShadow: "0 8px 32px rgba(0,0,0,0.4)"
-            }}
-          >
+          <div style={{ display: "flex", justifyContent: "center", padding: "1.5rem 1rem 2rem", width: "100%" }}>
+            <motion.nav
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.6 }}
+              className="z-30 flex items-center"
+              style={{
+                position: "sticky",
+                bottom: "1.5rem",
+                background: "rgba(15, 15, 15, 0.75)",
+                backdropFilter: "blur(16px)",
+                border: "1px solid rgba(255, 255, 255, 0.1)",
+                borderRadius: "999px",
+                padding: "0.5rem 0.75rem",
+                gap: "0.25rem",
+                boxShadow: "0 8px 32px rgba(0,0,0,0.4)"
+              }}
+            >
             <div className="w-9 h-9 rounded-full bg-[#ff3b3b]/20 border border-[#ff3b3b]/30 flex items-center justify-center text-[#ff3b3b] text-lg mr-2 shrink-0">
               🎣
             </div>
@@ -330,7 +357,8 @@ export default function LandingPage() {
                 Sign in & Play →
               </button>
             )}
-          </motion.nav>
+            </motion.nav>
+          </div>
 
         </div>
       </section>
