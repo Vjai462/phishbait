@@ -201,25 +201,50 @@ export default function GamePage() {
       <div className="absolute inset-0 bg-gradient-to-b from-[#0A0A14]/80 via-transparent to-[#0A0A14] z-0 pointer-events-none" />
 
       {/* TOP HUD BAR */}
-      <div className="fixed top-0 w-full z-50 bg-[rgba(10,10,20,0.92)] backdrop-blur-xl border-b border-[rgba(255,255,255,0.06)] h-[56px] px-6 flex items-center justify-between">
-        <div className="flex items-center">
-          <ShieldAlert size={18} color="#ff3b3b" />
-          <span className="font-mono text-[#ff3b3b] text-sm tracking-widest ml-2 font-bold">PHISHBAIT</span>
+      <div 
+        className="fixed top-0 w-full z-50 bg-[rgba(10,10,20,0.92)] backdrop-blur-xl border-b border-[rgba(255,255,255,0.06)] h-[56px]"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          padding: "0.5rem 0.75rem",
+          gap: "0.5rem",
+          flexWrap: "nowrap",
+          overflow: "hidden"
+        }}
+      >
+        {/* LOGO */}
+        <div className="flex items-center" style={{ flexShrink: 1, minWidth: 0, overflow: "hidden" }}>
+          <ShieldAlert size={18} color="#ff3b3b" style={{ flexShrink: 0 }} />
+          <span 
+            className="font-mono text-[#ff3b3b] tracking-widest ml-2 font-bold hidden sm:inline"
+            style={{ fontSize: "clamp(0.65rem, 2.5vw, 0.85rem)" }}
+          >
+            PHISHBAIT
+          </span>
         </div>
-        <div className="font-mono text-[#64748b] text-xs tracking-widest absolute left-1/2 -translate-x-1/2">
-          THREAT {currentIndex + 1} OF {challenges.length}
-        </div>
-        <div className="flex items-center">
+
+        {/* CENTER: THREAT & SCORE */}
+        <div className="flex items-center justify-center gap-3" style={{ flexShrink: 0 }}>
+          <div 
+            className="font-mono text-[#64748b] tracking-widest"
+            style={{ fontSize: "0.7rem" }}
+          >
+            {currentIndex + 1}/{challenges.length}
+          </div>
           <div className="flex items-baseline">
-            <span className="font-display font-bold text-[#f59e0b] text-base">{score}</span>
+            <span className="font-display font-bold text-[#f59e0b]" style={{ fontSize: "clamp(0.75rem, 2.5vw, 1rem)" }}>{score}</span>
             <span className="text-[#64748b] text-xs ml-1 font-mono">PTS</span>
           </div>
           {streak >= 3 && (
-            <div className="anim-pulse bg-[#f59e0b]/10 border border-[#f59e0b]/30 text-[#f59e0b] font-mono text-xs px-2 py-0.5 rounded-full ml-3">
+            <div className="anim-pulse bg-[#f59e0b]/10 border border-[#f59e0b]/30 text-[#f59e0b] font-mono text-xs px-2 py-0.5 rounded-full hidden sm:block">
               🔥 {streak}x
             </div>
           )}
-          
+        </div>
+
+        {/* RIGHT: USER & PAUSE */}
+        <div className="flex items-center justify-end gap-2" style={{ flexShrink: 0 }}>
           {!user ? (
             <button
               onClick={() => { setShowAuthModal(true); }}
@@ -231,11 +256,14 @@ export default function GamePage() {
                 fontSize: "0.7rem",
                 fontWeight: 700,
                 letterSpacing: "0.1em",
-                padding: "0.3rem 0.8rem",
+                padding: "0.3rem 0.6rem",
                 borderRadius: "999px",
                 cursor: "pointer",
                 textTransform: "uppercase",
-                marginLeft: "1rem"
+                maxWidth: "80px",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap"
               }}
             >
               ⚡ Sign In
@@ -247,8 +275,12 @@ export default function GamePage() {
                 background: "none", border: "none",
                 fontFamily: "monospace", fontSize: "0.7rem",
                 color: "rgba(34,211,170,0.7)", cursor: "pointer",
-                letterSpacing: "0.08em", padding: 0, marginLeft: "1rem",
-                textDecoration: "underline", textUnderlineOffset: "3px"
+                letterSpacing: "0.08em", padding: 0,
+                textDecoration: "underline", textUnderlineOffset: "3px",
+                maxWidth: "80px",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap"
               }}
             >
               {user.displayName?.split(" ")[0]?.toUpperCase()} ↗
@@ -257,8 +289,9 @@ export default function GamePage() {
 
           <button
             onClick={() => setIsPaused(true)}
-            className="ml-4 w-8 h-8 flex items-center justify-center rounded-full bg-[#ffffff10] text-white hover:bg-[#ffffff20] transition-colors border border-[#ffffff15] font-sans text-sm"
+            className="flex items-center justify-center rounded-full bg-[#ffffff10] text-white hover:bg-[#ffffff20] transition-colors border border-[#ffffff15] font-sans text-sm"
             aria-label="Pause game"
+            style={{ minWidth: "36px", minHeight: "36px" }}
           >
             ⏸
           </button>

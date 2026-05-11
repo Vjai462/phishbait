@@ -1,11 +1,10 @@
 "use client";
 
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 
 function ShareContent() {
   const params = useSearchParams();
-  const router = useRouter();
   const score = params.get("score") || "0";
   const accuracy = params.get("accuracy") || "0";
   const name = params.get("name") || "An Agent";
@@ -59,7 +58,7 @@ function ShareContent() {
         {/* CTA buttons */}
         <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
           <button
-            onClick={() => router.push("/play")}
+            onClick={() => { window.location.href = "/play"; }}
             style={{
               background: "#ef4444", color: "white", fontWeight: 700,
               fontSize: "1rem", padding: "0.85rem",
@@ -70,7 +69,7 @@ function ShareContent() {
             ▶ ACCEPT THE CHALLENGE
           </button>
           <button
-            onClick={() => router.push("/")}
+            onClick={() => { window.location.href = "/"; }}
             style={{
               background: "transparent",
               border: "1px solid rgba(255,255,255,0.1)",
